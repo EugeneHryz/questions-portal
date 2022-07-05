@@ -1,0 +1,54 @@
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+$qp-primary: #626de0;
+$qp-primary-light: #979bff;
+$qp-primary-dark: #2442ad;
+$qp-secondary: #ed1a70;
+$qp-secondary-light: #ff609e;
+$qp-secondary-dark: #b40045;
+$qp-white: #fff;
+$qp-black: #000;
+
+$qp-background: #f5f5f6;
+$qp-background2: #faf0d7;
+
+
+.btn-primary {
+    @include button-variant($qp-primary, darken($qp-primary, 7.5%), #fff, $qp-primary-dark, lighten($qp-primary, 10%), #fff);
+}
+
+.btn-secondary {
+    @include button-variant($qp-secondary, darken($qp-secondary, 7.5%), #fff, $qp-secondary-dark, lighten($qp-secondary, 10%), #fff);
+}
+
+.page-body {
+    display: flex;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    color: $qp-black;
+    flex-direction: column;
+    background-color: $qp-background;
+}
+  
+.login-container {
+    min-width: 340px;
+    margin-bottom: 100px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
+    background-color: $qp-white;
+}
+
+.app-name {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    font-size: 3.5rem;
+}
+
+.app-name .outlined {
+    -webkit-text-fill-color: $qp-white !important;
+    -webkit-text-stroke: 1px !important;
+}
