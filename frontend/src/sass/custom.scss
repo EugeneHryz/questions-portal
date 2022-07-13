@@ -24,11 +24,15 @@ $qp-background2: #faf0d7;
 .page-body {
     display: flex;
     min-height: 100vh;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     color: $qp-black;
     flex-direction: column;
     background-color: $qp-background;
+}
+
+.login-content {
+    margin-top: 80px;
 }
   
 .login-container {
@@ -52,3 +56,48 @@ $qp-background2: #faf0d7;
     -webkit-text-fill-color: $qp-white !important;
     -webkit-text-stroke: 1px !important;
 }
+
+.app-name-alt {
+    -webkit-text-fill-color: $qp-primary !important;
+    -webkit-text-stroke: 1px !important;
+}
+
+.home-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.app-header {
+    // position: relative;
+	// z-index: 1020;
+	background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+	box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.profile-card {
+    width: 40%;
+    min-width: 340px;
+    background-color: $qp-white;
+    align-self: center;
+    margin-top: 90px;
+    margin-bottom: 16%;
+    border-radius: 10px;
+}
+
+.profile-card .card-header {
+    background-color: $qp-background2;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.card .card-header {
+    font-size: 1.8rem;
+    font-weight: 300;
+    line-height: 1.2;
+}
+
+

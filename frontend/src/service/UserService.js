@@ -9,13 +9,22 @@ const options = {
 class UserService {
     
     logIn(email, password) {
-        const user = { email, password };
-        return axios.post(USERS_URL + "/login", JSON.stringify(user), options);
+        const options = {
+            headers: {
+                'Authorization': 'Basic ' + window.btoa(`${email}:${password}`) 
+            }
+        };
+        return axios.get(USERS_URL, options);
     }
 
-    signUp(email, password, firstName, lastName, phoneNumber) {
+    register(email, password, firstName, lastName, phoneNumber) {
         const newUser = { email, password, firstName, lastName, phoneNumber };
-        return axios.post(USERS_URL, JSON.stringify(newUser), options);
+        return axios.post(USERS_URL + "/signup", JSON.stringify(newUser), options);
+    }
+
+    update(id, email, password, firstName, lastName, phoneNumber) {
+        const updatedUser = { email, password, firstName, lastName, phoneNumber };
+        return axios.put(USERS_URL + "/" + id, JSON.stringify(updatedUser), options);
     }
 }
 
