@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './sass/custom.scss';
-import 'bootstrap/dist/js/bootstrap.js';
+import 'bootstrap';
+import '@fortawesome/fontawesome-free/css/all.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import App from './App';
 import LoginForm from './login/login';
@@ -27,5 +28,4 @@ root.render(
         </Route>
       </Routes>
     </BrowserRouter>
-  </React.StrictMode>
-);
+  </React.StrictMode>);

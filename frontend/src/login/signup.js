@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../app-context/appContext';
-import UserService from '../service/userService';
+import userService from '../service/userService';
 import Validation from './validation';
 
 function SignUpForm(props) {
@@ -22,7 +22,7 @@ function SignUpForm(props) {
         lastNameInvalidMsg: '',
         phoneNumberInvalidMsg: '',
 
-        emailAlreadyExistsMsg: ''
+        failedToRegisterMsg: ''
     });
 
     const navigate = useNavigate();
@@ -118,14 +118,17 @@ function SignUpForm(props) {
     }
 
     function registerUser(setUser) {
-        UserService.register(state.email, state.password, 
+        userService.register(state.email, state.password, 
             state.firstName, state.lastName, 
             state.phoneNumber).then((response) => {
             
+            return userService.logIn(state.email, state.password);
+        })
+        .then((response) => {
             console.log("Successfully registered!");
             console.log(response.data);
             setState(prevState => {
-                return { ...prevState, emailAlreadyExistsMsg: '' };
+                return { ...prevState, failedToRegisterMsg: '' };
             });
             const authenticatedUser = {
                 id: response.data.id,
@@ -140,9 +143,12 @@ function SignUpForm(props) {
         .catch((error) => {
             console.log(error);
 
-            const errorMsg = 'User with this email already exists';
+            let errorMsg = 'User with this email already exists';
+            if (error.response.status == 400) {
+                errorMsg = 'Invalid input data';
+            }
             setState(prevState => {
-                return { ...prevState, emailAlreadyExistsMsg: errorMsg };
+                return { ...prevState, failedToRegisterMsg: errorMsg };
             });
         })
     }
@@ -160,7 +166,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative mb-3">
                             <input id="floatingEmail" type="email" className={'form-control ' +
-                                (state.emailInvalidMsg.length != 0 ? 'is-invalid' : '')} name="email"
+                                (state.emailInvalidMsg ? 'is-invalid' : '')} name="email"
                                 data-bs-toggle="popover" placeholder=" " value={state.email}
                                 onChange={handleChange} />
                             <label htmlFor="floatingEmail">Email</label>
@@ -171,7 +177,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative mb-3">
                             <input id="floatingPassword" type="password" className={'form-control ' +
-                                (state.passwordInvalidMsg.length != 0 ? 'is-invalid' : '')} name="password"
+                                (state.passwordInvalidMsg ? 'is-invalid' : '')} name="password"
                                 data-bs-toggle="popover" placeholder=" " value={state.password}
                                 onChange={handleChange} />
                             <label htmlFor="floatingPassword">Password</label>
@@ -182,7 +188,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative mb-3">
                             <input id="floatingConfirmPassword" type="password" className={'form-control ' +
-                                (state.confirmPasswordInvalidMsg.length != 0 ? 'is-invalid' : '')} name="confirmPassword"
+                                (state.confirmPasswordInvalidMsg ? 'is-invalid' : '')} name="confirmPassword"
                                 data-bs-toggle="popover" placeholder=" " value={state.confirmPassword}
                                 onChange={handleChange} />
                             <label htmlFor="floatingConfirmPassword">Confirm password</label>
@@ -193,7 +199,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative mb-3">
                             <input id="floatingFirstName" type="text" className={'form-control ' +
-                                (state.firstNameInvalidMsg.length != 0 ? 'is-invalid' : '')} name="firstName"
+                                (state.firstNameInvalidMsg ? 'is-invalid' : '')} name="firstName"
                                 data-bs-toggle="popover" placeholder=" " value={state.firstName}
                                 onChange={handleChange} />
                             <label htmlFor="floatingFirstName">First name</label>
@@ -204,7 +210,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative mb-3">
                             <input id="floatingLastName" type="text" className={'form-control ' +
-                                (state.lastNameInvalidMsg.length != 0 ? 'is-invalid' : '')} name="lastName"
+                                (state.lastNameInvalidMsg ? 'is-invalid' : '')} name="lastName"
                                 data-bs-toggle="popover" placeholder=" " value={state.lastName}
                                 onChange={handleChange} />
                             <label htmlFor="floatingLastName">Last name</label>
@@ -215,7 +221,7 @@ function SignUpForm(props) {
 
                         <div className="form-floating position-relative">
                             <input id="floatingPhoneNumber" type="tel" className={'form-control ' +
-                                (state.phoneNumberInvalidMsg.length != 0 ? 'is-invalid' : '')} name="phoneNumber"
+                                (state.phoneNumberInvalidMsg ? 'is-invalid' : '')} name="phoneNumber"
                                 data-bs-toggle="popover" placeholder=" " value={state.phoneNumber}
                                 onChange={handleChange} />
                             <label htmlFor="floatingPhoneNumber">Phone number</label>
@@ -223,9 +229,9 @@ function SignUpForm(props) {
                                 {state.phoneNumberInvalidMsg}
                             </div>
                         </div>
-                        <div className="alert alert-danger mt-2 mb-0" style={(state.emailAlreadyExistsMsg.length === 0 ?
+                        <div className="alert alert-danger mt-2 mb-0" style={(!state.failedToRegisterMsg ?
                             { display: 'none' } : {})} role="alert">
-                            {state.emailAlreadyExistsMsg}
+                            {state.failedToRegisterMsg}
                         </div>
 
                         <button className="btn btn-secondary w-100 mt-3" type="submit" id="signUpButton">

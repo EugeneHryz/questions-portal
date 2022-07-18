@@ -13,8 +13,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -22,24 +24,30 @@ import java.util.Optional;
 @PropertySource("classpath:message.properties")
 public class UserServiceImpl implements UserService {
 
+    private static final String emailFrom = "dev.mail187@gmail.com";
+
     private final UserRepository userRepository;
     private final PasswordEncoder pwEncoder;
 
     private final ConversionService conversionService;
 
     private final MailService mailService;
-    private static final String emailFrom = "dev.mail187@gmail.com";
+    private final LogoutHandler logoutHandler;
 
     @Autowired
     private Environment env;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ConversionService conversionService,
-                           PasswordEncoder pwEncoder, MailService mailService) {
+    public UserServiceImpl(UserRepository userRepository,
+                           ConversionService conversionService,
+                           PasswordEncoder pwEncoder,
+                           MailService mailService,
+                           LogoutHandler logoutHandler) {
         this.userRepository = userRepository;
         this.conversionService = conversionService;
         this.pwEncoder = pwEncoder;
         this.mailService = mailService;
+        this.logoutHandler = logoutHandler;
     }
 
     @Override
@@ -103,10 +111,29 @@ public class UserServiceImpl implements UserService {
 
             oldUser.setEmail(user.getEmail());
             mailService.sendSimpleMail(emailFrom, user.getEmail(),
-                    env.getProperty("mail.accountCreated.subject"),
-                    env.getProperty("mail.accountCreated.text"));
+                    env.getProperty("mail.emailUpdated.subject"),
+                    env.getProperty("mail.emailUpdated.text"));
         }
         User updatedUser = userRepository.save(oldUser);
         return conversionService.convert(updatedUser, UserDto.class);
+    }
+
+    @Override
+    public void deleteUser(long id, String password, HttpServletRequest request) throws UserNotFoundException, InvalidPasswordException {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException("Unable to find user with id = " + id);
+        }
+        User user = userOptional.get();
+        String currentPassword = new String(user.getPassword(), StandardCharsets.UTF_8);
+        if (!pwEncoder.matches(password, currentPassword)) {
+            throw new InvalidPasswordException("Invalid password");
+        }
+
+        logoutHandler.logout(request, null, null);
+        userRepository.delete(user);
+        mailService.sendSimpleMail(emailFrom, user.getEmail(),
+                env.getProperty("mail.accountDeleted.subject"),
+                env.getProperty("mail.accountDeleted.text"));
     }
 }

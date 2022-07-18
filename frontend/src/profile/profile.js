@@ -1,7 +1,8 @@
+import { Toast } from "bootstrap";
 import React, { useState } from "react";
 import { AppContext } from "../app-context/appContext";
 import Validation from "../login/validation";
-import UserService from "../service/userService";
+import userService from "../service/userService";
 
 class Profile extends React.Component {
     static contextType = AppContext;
@@ -28,6 +29,8 @@ class Profile extends React.Component {
             confirmPwInvalidMsg: '',
             updateProfileResultMsg: ''
         };
+
+        this.toastRef = React.createRef();
 
         this.handleChange = this.handleChange.bind(this);
         this.validateEmail = this.validateEmail.bind(this);
@@ -140,19 +143,47 @@ class Profile extends React.Component {
     }
 
     updateUser(setUser) {
-        // const toastNotification = document.getElementById("notificationToast");
-        
-        // const toast = new Toast(toastNotification);
-        // toast.show();
-
-        UserService.update(this.state.id, this.state.email,
-            this.state.password, this.state.firstName,
+        this.setState({
+            updateProfileResultMsg: ''
+        });
+        userService.update(this.state.id, this.state.email,
+            this.state.currentPassword, this.state.firstName,
             this.state.lastName, this.state.phoneNumber).then((response) => {
-
+                console.log("User updated successfully!");
+                const successMsg = "Profile updated successfully!";
+                
+                const updatedUser = {
+                    email: response.data.email,
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName,
+                    phoneNumber: response.data.phoneNumber,
+                    currentPassword: ''
+                };
+                this.setState({
+                    updateProfileResultMsg: successMsg,
+                    ...updatedUser
+                });
+                setUser(updatedUser);
             })
             .catch((error) => {
+                console.log(error);
 
+                const errorMsg = "Unable to update user profile";
+                this.setState({ updateProfileResultMsg: errorMsg });
             });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.updateProfileResultMsg && this.state.updateProfileResultMsg 
+            !== prevState.updateProfileResultMsg) {
+            // show toast notification
+            const toastDomElmnt = this.toastRef.current;
+            let toast = Toast.getInstance(toastDomElmnt);
+            if (!toast) {
+                toast = new Toast(toastDomElmnt);
+            }
+            toast.show();
+        }
     }
 
     render() {
@@ -169,7 +200,7 @@ class Profile extends React.Component {
                                 <div className="mb-2 position-relative">
                                     <label htmlFor="firstName" className="form-label">First name</label>
                                     <input type="text" name="firstName" className={'form-control ' +
-                                        (this.state.firstNameInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="firstName"
+                                        (this.state.firstNameInvalidMsg ? 'is-invalid' : '')} id="firstName"
                                            value={this.state.firstName} onChange={this.handleChange} />
                                     <div className="invalid-tooltip">
                                         {this.state.firstNameInvalidMsg}
@@ -179,7 +210,7 @@ class Profile extends React.Component {
                                 <div className="mb-2 position-relative">
                                     <label htmlFor="lastName" className="form-label">Last name</label>
                                     <input type="text" name="lastName" className={'form-control ' +
-                                        (this.state.lastNameInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="lastName"
+                                        (this.state.lastNameInvalidMsg ? 'is-invalid' : '')} id="lastName"
                                            value={this.state.lastName} onChange={this.handleChange} />
                                     <div className="invalid-tooltip">
                                         {this.state.lastNameInvalidMsg}
@@ -191,7 +222,7 @@ class Profile extends React.Component {
                                         <span className="text-danger"> *</span>
                                     </label>
                                     <input type="email" name="email" className={'form-control ' +
-                                        (this.state.emailInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="email"
+                                        (this.state.emailInvalidMsg ? 'is-invalid' : '')} id="email"
                                            value={this.state.email} onChange={this.handleChange} />
                                     <div className="invalid-tooltip">
                                         {this.state.emailInvalidMsg}
@@ -201,7 +232,7 @@ class Profile extends React.Component {
                                 <div className="mb-2 position-relative">
                                     <label htmlFor="phoneNumber" className="form-label">Phone number</label>
                                     <input type="text" name="phoneNumber" className={'form-control ' +
-                                        (this.state.phoneNumberInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="phoneNumber"
+                                        (this.state.phoneNumberInvalidMsg ? 'is-invalid' : '')} id="phoneNumber"
                                            value={this.state.phoneNumber} onChange={this.handleChange} />
                                     <div className="invalid-tooltip">
                                         {this.state.phoneNumberInvalidMsg}
@@ -215,7 +246,7 @@ class Profile extends React.Component {
                                     <span className="text-danger"> *</span>
                                 </label>
                                 <input type="password" name="currentPassword" className={'form-control ' +
-                                    (this.state.currentPwInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="currentPassword"
+                                    (this.state.currentPwInvalidMsg ? 'is-invalid' : '')} id="currentPassword"
                                        value={this.state.currentPassword} onChange={this.handleChange} form="editProfileForm"/>
                                 <div className="invalid-tooltip">
                                     {this.state.currentPwInvalidMsg}
@@ -225,7 +256,7 @@ class Profile extends React.Component {
                             <div className="mb-2 position-relative">
                                 <label htmlFor="newPassword" className="form-label">New password</label>
                                 <input type="password" name="newPassword" className={'form-control ' +
-                                    (this.state.newPwInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="newPassword"
+                                    (this.state.newPwInvalidMsg ? 'is-invalid' : '')} id="newPassword"
                                        value={this.state.newPassword} onChange={this.handleChange} form="editProfileForm"/>
                                 <div className="invalid-tooltip">
                                     {this.state.newPwInvalidMsg}
@@ -235,7 +266,7 @@ class Profile extends React.Component {
                             <div className="mb-2 position-relative">
                                 <label htmlFor="confirmPassword" className="form-label">Confirm new password</label>
                                 <input type="password" name="confirmPassword" className={'form-control ' +
-                                    (this.state.confirmPwInvalidMsg.length !== 0 ? 'is-invalid' : '')} id="confirmPassword"
+                                    (this.state.confirmPwInvalidMsg ? 'is-invalid' : '')} id="confirmPassword"
                                        value={this.state.confirmPassword} onChange={this.handleChange} form="editProfileForm"/>
                                 <div className="invalid-tooltip">
                                     {this.state.confirmPwInvalidMsg}
@@ -251,7 +282,8 @@ class Profile extends React.Component {
                     </div>
                 </div>
                 <div className="toast-container position-fixed bottom-0 end-0 p-3">
-                    <div id="notificationToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div id="notificationToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                        ref={this.toastRef}>
                         <div className="toast-header">
                             <strong className="me-auto">Notification</strong>
                             <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"/>
