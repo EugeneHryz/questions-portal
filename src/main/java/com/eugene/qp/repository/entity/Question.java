@@ -11,8 +11,8 @@ public class Question extends AbstractEntity {
     @Column(nullable = false)
     private String question;
 
-    @Column(nullable = false, name = "answer_type")
-    @Enumerated(value = EnumType.STRING)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "answer_type")
     private AnswerType answerType;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -25,16 +25,21 @@ public class Question extends AbstractEntity {
 
     @ElementCollection
     @CollectionTable(name = "answer_options")
-    private final Set<AnswerOption> answerOptions = new HashSet<>();
+    private Set<AnswerOption> answerOptions;
 
     public Question() {
     }
 
-    public Question(String question, AnswerType answerType, User fromUser, User toUser) {
+    public Question(String question,
+                    AnswerType answerType,
+                    User fromUser,
+                    User toUser,
+                    Set<AnswerOption> answerOptions) {
         this.question = question;
         this.answerType = answerType;
         this.fromUser = fromUser;
         this.toUser = toUser;
+        this.answerOptions = answerOptions;
     }
 
     public String getQuestion() {
@@ -71,6 +76,10 @@ public class Question extends AbstractEntity {
 
     public Set<AnswerOption> getAnswerOptions() {
         return answerOptions;
+    }
+
+    public void setAnswerOptions(Set<AnswerOption> answerOptions) {
+        this.answerOptions = answerOptions;
     }
 
     @Override

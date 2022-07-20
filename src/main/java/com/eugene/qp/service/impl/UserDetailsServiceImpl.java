@@ -28,13 +28,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Specified email does not exist");
         }
         User user = userOptional.get();
-        String password = new String(user.getPassword(), StandardCharsets.UTF_8);
 
         // for now app has only one role
         String[] roles = { "USER" };
         return builder()
                 .username(user.getEmail())
-                .password(password)
+                .password(user.getPassword())
                 .roles(roles)
                 .build();
     }

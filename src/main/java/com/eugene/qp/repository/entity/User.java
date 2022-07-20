@@ -14,7 +14,7 @@ public class User extends AbstractEntity {
     private String email;
 
     @Column(nullable = false)
-    private byte[] password;
+    private String password;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -28,14 +28,14 @@ public class User extends AbstractEntity {
     public User() {
     }
 
-    public User(String email, byte[] password, String phoneNumber, String firstName, String lastName) {
+    public User(String email, String password, String phoneNumber, String firstName, String lastName) {
         this(email, password);
         this.phoneNumber = phoneNumber;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
-    public User(String email, byte[] password) {
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
@@ -48,11 +48,11 @@ public class User extends AbstractEntity {
         this.email = email;
     }
 
-    public byte[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(byte[] password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -85,7 +85,7 @@ public class User extends AbstractEntity {
         return "User{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
-                ", password=" + Arrays.toString(password) +
+                ", password=" + password +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
@@ -99,7 +99,7 @@ public class User extends AbstractEntity {
         User user = (User) o;
         return id == user.id
                 && Objects.equals(email, user.email)
-                && Arrays.equals(password, user.password)
+                && password.equals(user.password)
                 && Objects.equals(phoneNumber, user.phoneNumber)
                 && Objects.equals(firstName, user.firstName)
                 && Objects.equals(lastName, user.lastName);
@@ -108,7 +108,7 @@ public class User extends AbstractEntity {
     @Override
     public int hashCode() {
         int result = Objects.hash(id, email, phoneNumber, firstName, lastName);
-        result = 31 * result + Arrays.hashCode(password);
+        result = 31 * result + password.hashCode();
         return result;
     }
 }

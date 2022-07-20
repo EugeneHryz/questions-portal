@@ -3,10 +3,11 @@ package com.eugene.qp.service.dto.converter;
 import com.eugene.qp.repository.entity.User;
 import com.eugene.qp.service.dto.UserDto;
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class UserDtoConverter extends AbstractTwoWayConverter <User, UserDto> {
+public class UserDtoConverter extends AbstractTwoWayConverter<User, UserDto> {
 
     @Override
     protected UserDto convertTo(User source) {

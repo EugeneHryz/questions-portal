@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Service
@@ -57,10 +59,9 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("User with specified email already exists");
         }
         String pwEncoded = pwEncoder.encode(user.getPassword());
-        byte[] pwEncodedBytes = pwEncoded.getBytes(StandardCharsets.UTF_8);
 
         User newUser = new User(user.getEmail(),
-                pwEncodedBytes,
+                pwEncoded,
                 user.getPhoneNumber(),
                 user.getFirstName(),
                 user.getLastName());
@@ -71,7 +72,6 @@ public class UserServiceImpl implements UserService {
         mailService.sendSimpleMail(emailFrom, user.getEmail(),
                 env.getProperty("mail.accountCreated.subject"),
                 env.getProperty("mail.accountCreated.text"));
-
         return user;
     }
 
@@ -90,25 +90,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserDto> searchUsersByEmailPaginated(String searchEmail, int page, int size) {
+        Pageable pageRequest = PageRequest.of(page, size);
+        Page<User> usersPage = userRepository.findUsersByEmailContaining(searchEmail, pageRequest);
+
+        return usersPage.map(u -> {
+            UserDto userDto = conversionService.convert(u, UserDto.class);
+            if (userDto != null) {
+                userDto.setPassword(null);
+            }
+            return userDto;
+        });
+    }
+
+    @Override
     public UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException {
         Optional<User> userOptional = userRepository.findById(user.getId());
         if (userOptional.isEmpty()) {
             throw new UserNotFoundException("Unable to find user with id = " + user.getId());
         }
         User oldUser = userOptional.get();
-        String currentPw = new String(oldUser.getPassword(), StandardCharsets.UTF_8);
-        if (!pwEncoder.matches(user.getPassword(), currentPw)) {
+        if (!pwEncoder.matches(user.getPassword(), oldUser.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
         String newPwEncoded = pwEncoder.encode(user.getPassword());
-        byte[] newPwEncodedBytes = newPwEncoded.getBytes(StandardCharsets.UTF_8);
 
-        oldUser.setPassword(newPwEncodedBytes);
+        oldUser.setPassword(newPwEncoded);
         oldUser.setFirstName(user.getFirstName());
         oldUser.setLastName(user.getLastName());
         oldUser.setPhoneNumber(user.getPhoneNumber());
-        if (!oldUser.getEmail().equals(user.getEmail())) {
 
+        if (!oldUser.getEmail().equals(user.getEmail())) {
             oldUser.setEmail(user.getEmail());
             mailService.sendSimpleMail(emailFrom, user.getEmail(),
                     env.getProperty("mail.emailUpdated.subject"),
@@ -125,8 +137,7 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("Unable to find user with id = " + id);
         }
         User user = userOptional.get();
-        String currentPassword = new String(user.getPassword(), StandardCharsets.UTF_8);
-        if (!pwEncoder.matches(password, currentPassword)) {
+        if (!pwEncoder.matches(password, user.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
 

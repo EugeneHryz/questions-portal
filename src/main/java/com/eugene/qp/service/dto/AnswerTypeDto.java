@@ -1,18 +1,13 @@
-package com.eugene.qp.repository.entity;
+package com.eugene.qp.service.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+public class AnswerTypeDto extends AbstractDto {
 
-@Entity
-public class AnswerType extends AbstractEntity {
-
-    @Column(nullable = false, unique = true)
     private String type;
 
-    public AnswerType() {
+    public AnswerTypeDto() {
     }
 
-    public AnswerType(String type) {
+    public AnswerTypeDto(String type) {
         this.type = type;
     }
 
@@ -26,7 +21,7 @@ public class AnswerType extends AbstractEntity {
 
     @Override
     public String toString() {
-        return "AnswerType{" +
+        return "AnswerTypeDto{" +
                 "id=" + id +
                 ", type='" + type + '\'' +
                 '}';

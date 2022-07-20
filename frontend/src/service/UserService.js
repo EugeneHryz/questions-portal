@@ -22,7 +22,7 @@ class UserService {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         };
-        return axios.get(USERS_URL, options);
+        return axios.get(USERS_URL + "/login", options);
     }
 
     register(email, password, firstName, lastName, phoneNumber) {
@@ -46,15 +46,20 @@ class UserService {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             withCredentials: true,
-            data: {
-                password: password
-            }
+            data: { password }
         }
         return axios.delete(USERS_URL + "/" + userId, options);
     }
 
-    test() {
-        return axios.get(USERS_URL + "/questions", options);
+    searchUsersByEmail(emailSearch) {
+        const options = {
+            withCredentials: true,
+            params: {
+                email: emailSearch,
+                size: 5
+            }
+        }
+        return axios.get(USERS_URL, options);
     }
 }
 

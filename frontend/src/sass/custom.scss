@@ -14,8 +14,11 @@ $qp-background2: #faf0d7;
 $qp-background-danger: #fad7d7;
 
 $primary: $qp-primary;
-$modal-md: 340px;
+$modal-md: 440px;
 $card-cap-bg: $qp-white;
+$modal-fade-transform: scale(.8);
+$modal-transition: transform .15s ease-out;
+$table-cell-vertical-align: middle;
 
 @import "../../node_modules/bootstrap/scss/bootstrap.scss";
 
@@ -119,7 +122,6 @@ $card-cap-bg: $qp-white;
     flex-direction: column;
     align-items: center;
     align-self: center;
-    width: 50%;
 }
 
 .questions-page .card-header {
@@ -128,6 +130,22 @@ $card-cap-bg: $qp-white;
 
 .delete-account-modal .modal-header {
     background-color: $qp-background-danger;
+}
+
+.card-body .table {
+    width: 700px;
+}
+
+th {
+    font-weight: 500;
+}
+
+.app-table > thead > tr > th {
+    padding: 0.7rem 0.7rem;
+}
+
+.table > :not(:first-child) {
+    border-top: 1px solid currentColor;
 }
 
 

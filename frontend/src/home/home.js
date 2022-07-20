@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppContext } from '../app-context/appContext';
 import Header from '../header/header';
+import AddEditQuestionModal from '../questions/addEditQuestion';
 import userService from '../service/userService';
 
 function HomePage(props) {
@@ -20,6 +21,8 @@ function HomePage(props) {
         showModal: showModal,
         hideModal: hideModal,
 
+        showAddEditQuestionModal: false,
+        editQuestionModal: false,
         password: '',
         passwordInvalidMsg: '',
         failedToDeleteMsg: ''
@@ -72,15 +75,27 @@ function HomePage(props) {
         })
     }
 
+    const showAddEditQuestionModal = () => {
+        setState(prevState => {
+            return { ...prevState, showAddEditQuestionModal: true };
+        });
+    };
+
+    const hideAddEditQuestionModal = () => {
+        setState(prevState => {
+            return { ...prevState, showAddEditQuestionModal: false };
+        });
+    };
+
     return (<div className="home-page">
         <Header showModal={state.showModal} />
-        <Outlet />
+        <Outlet context={{ showAddEditQuestionModal }} />
 
         <AppContext.Consumer>
             {({ user, setUser }) => (
                 <div className="modal fade delete-account-modal" id="confirmationModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
                     ref={modalRef}>
-                    <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-dialog modal-sm modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title" id="modalHeader">Delete account?</h5>
@@ -110,6 +125,9 @@ function HomePage(props) {
                     </div>
                 </div>)}
         </AppContext.Consumer>
+
+        <AddEditQuestionModal shouldShow={state.showAddEditQuestionModal} 
+            edit={state.editQuestionModal} hide={hideAddEditQuestionModal} />
     </div>);
 }
 

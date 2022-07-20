@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './sass/custom.scss';
 import 'bootstrap';
 import '@fortawesome/fontawesome-free/css/all.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import App from './App';
 import LoginForm from './login/login';

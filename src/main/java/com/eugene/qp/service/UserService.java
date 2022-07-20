@@ -4,6 +4,7 @@ import com.eugene.qp.service.dto.UserDto;
 import com.eugene.qp.service.exception.InvalidPasswordException;
 import com.eugene.qp.service.exception.UserAlreadyExistsException;
 import com.eugene.qp.service.exception.UserNotFoundException;
+import org.springframework.data.domain.Page;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,6 +13,8 @@ public interface UserService {
     UserDto registerUser(UserDto user) throws UserAlreadyExistsException;
 
     UserDto getUserByEmail(String email) throws UserNotFoundException;
+
+    Page<UserDto> searchUsersByEmailPaginated(String searchEmail, int page, int size);
 
     UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException;
 
