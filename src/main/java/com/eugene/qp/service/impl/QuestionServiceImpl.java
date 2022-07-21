@@ -70,7 +70,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public Page<QuestionDto> getUserQuestionsPaginated(long userId, int page, int size) {
         Pageable pageRequest = PageRequest.of(page, size);
-        Page<Question> questionsPage = questionRepository.findByFromUser_Id(userId, pageRequest);
+        Page<Question> questionsPage = questionRepository.findByFromUser_IdOrderById(userId, pageRequest);
 
         return questionsPage.map(q -> conversionService.convert(q, QuestionDto.class));
     }

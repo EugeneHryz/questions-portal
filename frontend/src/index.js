@@ -26,6 +26,13 @@ root.render(
             <Route path="profile" element={<Profile />} />
             <Route path="questions" element={<YourQuestions />} />
           </Route>
+          <Route
+            path="*"
+            element={
+              <main className="my-auto">
+                <p className="display-4">Page not found</p>
+              </main>
+            }/>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -8,6 +8,7 @@ import questionService from "../service/questionService";
 import userService from "../service/userService";
 import React from 'react';
 import { AppContext } from "../app-context/appContext";
+import DeleteRoundedIcon from '@mui/icons-material/ClearRounded';
 
 function renderItem(item, handleRemoveItem) {
     return (
@@ -18,7 +19,7 @@ function renderItem(item, handleRemoveItem) {
                     aria-label="delete"
                     title="Delete"
                     onClick={() => handleRemoveItem(item)}>
-                    <i className="fa-solid fa-xmark"></i>
+                    <DeleteRoundedIcon />
                 </IconButton>}>
             <ListItemText primary={item} />
         </ListItem>

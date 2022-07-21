@@ -38,7 +38,6 @@ $table-cell-vertical-align: middle;
 .page-body {
     display: flex;
     min-height: 100vh;
-    justify-content: start;
     align-items: center;
     color: $qp-black;
     flex-direction: column;
@@ -67,13 +66,13 @@ $table-cell-vertical-align: middle;
 }
 
 .app-name .outlined {
-    -webkit-text-fill-color: $qp-white !important;
-    -webkit-text-stroke: 1px !important;
+    -webkit-text-fill-color: $qp-white;
+    -webkit-text-stroke: 1px;
 }
 
 .app-name-alt {
-    -webkit-text-fill-color: $qp-primary !important;
-    -webkit-text-stroke: 1px !important;
+    -webkit-text-fill-color: $qp-primary;
+    -webkit-text-stroke: 1px;
 }
 
 .home-page {
@@ -122,6 +121,7 @@ $table-cell-vertical-align: middle;
     flex-direction: column;
     align-items: center;
     align-self: center;
+    width: 65%;
 }
 
 .questions-page .card-header {
@@ -132,16 +132,45 @@ $table-cell-vertical-align: middle;
     background-color: $qp-background-danger;
 }
 
-.card-body .table {
-    width: 700px;
+.questions-page .table-wrapper {
+    min-height: 275.38px;
 }
 
-th {
+.questions-table {
+    white-space: nowrap;
+    table-layout: fixed;
+}
+
+.questions-table > thead > tr > th {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
     font-weight: 500;
 }
 
-.app-table > thead > tr > th {
-    padding: 0.7rem 0.7rem;
+.questions-table > tbody > tr > td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.questions-table .for-user-col {
+    width: 21%;
+}
+
+.questions-table .question-col {
+    width: 21%;
+}
+
+.questions-table .answer-type-col {
+    width: 21%;
+}
+
+.questions-table .answer-col {
+    width: 21%;
+}
+
+.questions-table .actions-col {
+    width: 16%;
+    text-align: right;
 }
 
 .table > :not(:first-child) {
