@@ -1,6 +1,5 @@
 package com.eugene.qp.web.config;
 
-import com.eugene.qp.service.dto.converter.AnswerTypeDtoConverter;
 import com.eugene.qp.service.dto.converter.QuestionDtoConverter;
 import com.eugene.qp.service.dto.converter.UserDtoConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +41,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new UserDtoConverter());
-        AnswerTypeDtoConverter answerTypeConverter = new AnswerTypeDtoConverter();
-
-        registry.addConverter(answerTypeConverter);
-        registry.addConverter(new QuestionDtoConverter(answerTypeConverter));
+        registry.addConverter(new QuestionDtoConverter());
     }
 }

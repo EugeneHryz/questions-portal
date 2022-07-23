@@ -138,8 +138,8 @@ function AddEditQuestionModal(props) {
     function validateOptionsList(answerType, options) {
         let isValid = true;
         let errorMsg = '';
-        if (![1, 2, 6].includes(answerType.id)) {
-            if (answerType.id === 4 && options.length !== 1) {
+        if (!['SINGLE_LINE_TEXT', 'MULTILINE_TEXT', 'DATE'].includes(answerType)) {
+            if (answerType === 'CHECKBOX' && options.length !== 1) {
                 errorMsg = 'For checkbox you need to add only one option';
                 isValid = false;
             } else if (options.length === 0) {
@@ -147,9 +147,7 @@ function AddEditQuestionModal(props) {
                 isValid = false;
             }
         }
-        setState(prevState => {
-            return { ...prevState, optionsInvalidMsg: errorMsg };
-        });
+        setState(prevState => ({ ...prevState, optionsInvalidMsg: errorMsg }));
         return isValid;
     }
 
@@ -165,12 +163,18 @@ function AddEditQuestionModal(props) {
                 .then(response => {
                     const modal = Modal.getOrCreateInstance(modalRef.current);
                     modal.hide();
+                    props.setReloadQuestions(prevValue => !prevValue);
                 })
                 .catch(error => {
                     console.log(error);
-                })
+                });
         }
         e.preventDefault();
+    }
+
+    function formatAnswerType(answerType) {
+        const s = answerType.replaceAll('_', ' ').toLowerCase();
+        return s && s[0].toUpperCase() + s.slice(1);
     }
 
     return (<div className="modal fade" id="addEditQuestionModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
@@ -239,8 +243,8 @@ function AddEditQuestionModal(props) {
                                         <Autocomplete disablePortal
                                             id="selectAnswerType"
                                             disableClearable
-                                            isOptionEqualToValue={(option, value) => option.type === value.type}
-                                            getOptionLabel={(option) => option ? option.type : ''}
+                                            isOptionEqualToValue={(option, value) => option === value}
+                                            getOptionLabel={(option) => formatAnswerType(option)}
                                             value={selectedAnswerType}
                                             onChange={(e, newValue) => {
                                                 if ([1, 2, 6].includes(newValue.id)) {

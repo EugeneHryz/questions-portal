@@ -23,7 +23,6 @@ class QuestionService {
             answerType,
             answerOptions
         };
-        console.log("Question to create: " + JSON.stringify(questionToCreate));
         return axios.post(QUESTIONS_URL, JSON.stringify(questionToCreate), options);
     }
 
@@ -38,6 +37,10 @@ class QuestionService {
             }
         }
         return axios.get(QUESTIONS_URL, options);
+    }
+
+    deleteQuestion(id) {
+        return axios.delete(QUESTIONS_URL + "/" + id, options);
     }
 }
 

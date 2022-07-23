@@ -14,14 +14,16 @@ class UserService {
     logIn(email, password) {
         const options = {
             withCredentials: true,
-            auth: {
-                username: email,
-                password: password
-            },
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         };
+        if (email && password) {
+            options.auth = {
+                username: email,
+                password: password
+            };
+        }
         return axios.get(USERS_URL + "/login", options);
     }
 

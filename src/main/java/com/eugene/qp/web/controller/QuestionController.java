@@ -1,15 +1,19 @@
 package com.eugene.qp.web.controller;
 
+import com.eugene.qp.repository.entity.AnswerType;
 import com.eugene.qp.service.QuestionService;
-import com.eugene.qp.service.dto.AnswerTypeDto;
 import com.eugene.qp.service.dto.QuestionDto;
+import com.eugene.qp.service.dto.validation.QuestionDtoValidator;
+import com.eugene.qp.service.exception.QuestionNotFoundException;
 import com.eugene.qp.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -24,8 +28,13 @@ public class QuestionController {
         this.questionService = questionService;
     }
 
+    @InitBinder(value = "questionDto")
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(new QuestionDtoValidator());
+    }
+
     @GetMapping(value = "/answer-types", produces = {"application/json"})
-    public List<AnswerTypeDto> getAllAnswerTypes() {
+    public List<AnswerType> getAllAnswerTypes() {
         return questionService.getAllAnswerTypes();
     }
 
@@ -37,13 +46,19 @@ public class QuestionController {
     }
 
     @PostMapping(consumes = {"application/json"})
-    public ResponseEntity<QuestionDto> createQuestion(@RequestBody QuestionDto question,
+    public ResponseEntity<QuestionDto> createQuestion(@RequestBody @Valid QuestionDto questionDto,
                                                       UriComponentsBuilder ucb) throws UserNotFoundException {
-        QuestionDto createdQuestion = questionService.createQuestion(question);
+        QuestionDto createdQuestion = questionService.createQuestion(questionDto);
         URI locationUri = ucb.path("/questions/")
                 .path(String.valueOf(createdQuestion.getId()))
                 .build()
                 .toUri();
         return ResponseEntity.created(locationUri).body(createdQuestion);
     }
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteQuestion(@PathVariable long id) throws QuestionNotFoundException {
+        questionService.deleteQuestion(id);
+    }
+
 }

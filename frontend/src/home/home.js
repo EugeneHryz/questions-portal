@@ -27,6 +27,7 @@ function HomePage(props) {
         passwordInvalidMsg: '',
         failedToDeleteMsg: ''
     });
+    const [reloadQuestions, setReloadQuestions] = useState(false);
     const navigate = useNavigate();
 
     function handleChange(e) {
@@ -89,7 +90,7 @@ function HomePage(props) {
 
     return (<div className="home-page">
         <Header showModal={state.showModal} />
-        <Outlet context={{ showAddEditQuestionModal }} />
+        <Outlet context={[ showAddEditQuestionModal, reloadQuestions ]} />
 
         <AppContext.Consumer>
             {({ user, setUser }) => (
@@ -126,8 +127,11 @@ function HomePage(props) {
                 </div>)}
         </AppContext.Consumer>
 
-        <AddEditQuestionModal shouldShow={state.showAddEditQuestionModal} 
-            edit={state.editQuestionModal} hide={hideAddEditQuestionModal} />
+        <AddEditQuestionModal 
+            shouldShow={state.showAddEditQuestionModal} 
+            edit={state.editQuestionModal} 
+            hide={hideAddEditQuestionModal} 
+            setReloadQuestions={setReloadQuestions} />
     </div>);
 }
 

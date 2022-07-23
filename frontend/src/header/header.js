@@ -19,7 +19,7 @@ function Header(props) {
     }
 
     return (<nav className="navbar navbar-expand-md navbar-light fixed-top app-header align-self-stretch">
-        <div className="container-fluid justify-content-end">
+        <div className="container-fluid">
 
             <Link className="navbar-brand fs-2 fw-normal" to="/home">AskMe</Link>
             <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -37,17 +37,19 @@ function Header(props) {
                         <a className="nav-link" href="#">Your answers</a>
                     </li>
                 </ul>
-            </div>
 
-            <div className="dropdown">
-                <a href="#" className="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownAccount" data-bs-toggle="dropdown" aria-expanded="false">
-                    Account
-                </a>
-                <ul className="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownAccount">
-                    <li><Link className="dropdown-item" to="/home/profile">Profile</Link></li>
-                    <li><button className="dropdown-item" onClick={handleAccountDelete}>Delete account</button></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><button className="dropdown-item" onClick={logOut}>Log out</button></li>
+                <ul className="navbar-nav">
+                    <li className="nav-item dropdown">
+                        <button className="dropdown-toggle-text dropdown-toggle" id="dropdownAccount" data-bs-toggle="dropdown" aria-expanded="false">
+                            Account
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end text-small shadow" aria-labelledby="dropdownAccount">
+                            <li><Link className="dropdown-item" to="/home/profile">Profile</Link></li>
+                            <li><button className="dropdown-item" onClick={handleAccountDelete}>Delete account</button></li>
+                            <li><hr className="dropdown-divider" /></li>
+                            <li><button className="dropdown-item" onClick={logOut}>Log out</button></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

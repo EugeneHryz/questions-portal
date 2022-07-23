@@ -1,11 +1,13 @@
 package com.eugene.qp.service.dto;
 
+import com.eugene.qp.repository.entity.AnswerType;
+
 import java.util.Set;
 
 public class QuestionDto extends AbstractDto {
 
     private String question;
-    private AnswerTypeDto answerType;
+    private AnswerType answerType;
     private long fromUserId;
     private String toUserEmail;
     private Set<String> answerOptions;
@@ -14,7 +16,7 @@ public class QuestionDto extends AbstractDto {
     }
 
     public QuestionDto(String question,
-                       AnswerTypeDto answerType,
+                       AnswerType answerType,
                        long fromUserId,
                        String toUserEmail,
                        Set<String> answerOptions) {
@@ -33,11 +35,11 @@ public class QuestionDto extends AbstractDto {
         this.question = question;
     }
 
-    public AnswerTypeDto getAnswerType() {
+    public AnswerType getAnswerType() {
         return answerType;
     }
 
-    public void setAnswerType(AnswerTypeDto answerType) {
+    public void setAnswerType(AnswerType answerType) {
         this.answerType = answerType;
     }
 

@@ -1,13 +1,13 @@
 package com.eugene.qp.service.impl;
 
-import com.eugene.qp.repository.dao.AnswerTypeRepository;
 import com.eugene.qp.repository.dao.QuestionRepository;
 import com.eugene.qp.repository.dao.UserRepository;
+import com.eugene.qp.repository.entity.AnswerType;
 import com.eugene.qp.repository.entity.Question;
 import com.eugene.qp.repository.entity.User;
 import com.eugene.qp.service.QuestionService;
-import com.eugene.qp.service.dto.AnswerTypeDto;
 import com.eugene.qp.service.dto.QuestionDto;
+import com.eugene.qp.service.exception.QuestionNotFoundException;
 import com.eugene.qp.service.exception.UserNotFoundException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,32 +24,22 @@ import java.util.Optional;
 @Transactional
 public class QuestionServiceImpl implements QuestionService {
 
-    private final AnswerTypeRepository answerTypeRepository;
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
 
     private final ConversionService conversionService;
 
-    public QuestionServiceImpl(AnswerTypeRepository answerTypeRepo,
-                               QuestionRepository questionRepo,
+    public QuestionServiceImpl(QuestionRepository questionRepo,
                                UserRepository userRepository,
                                ConversionService conversionService) {
-        answerTypeRepository = answerTypeRepo;
         questionRepository = questionRepo;
         this.userRepository = userRepository;
         this.conversionService = conversionService;
     }
 
     @Override
-    public List<AnswerTypeDto> getAllAnswerTypes() {
-        List<AnswerTypeDto> answerTypes = new ArrayList<>();
-        answerTypeRepository.findAll().forEach(t -> {
-            AnswerTypeDto dto = new AnswerTypeDto(t.getType());
-            dto.setId(t.getId());
-
-            answerTypes.add(dto);
-        });
-        return answerTypes;
+    public List<AnswerType> getAllAnswerTypes() {
+        return Arrays.asList(AnswerType.values());
     }
 
     @Override
@@ -73,5 +63,14 @@ public class QuestionServiceImpl implements QuestionService {
         Page<Question> questionsPage = questionRepository.findByFromUser_IdOrderById(userId, pageRequest);
 
         return questionsPage.map(q -> conversionService.convert(q, QuestionDto.class));
+    }
+
+    @Override
+    public void deleteQuestion(long id) throws QuestionNotFoundException {
+        Optional<Question> question = questionRepository.findById(id);
+        if (question.isEmpty()) {
+            throw new QuestionNotFoundException("Unable to find question with given id=" + id);
+        }
+        questionRepository.delete(question.get());
     }
 }

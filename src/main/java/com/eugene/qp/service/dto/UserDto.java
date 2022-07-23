@@ -1,5 +1,7 @@
 package com.eugene.qp.service.dto;
 
+import javax.validation.constraints.NotNull;
+
 public class UserDto extends AbstractDto {
 
     private String email;
@@ -11,8 +13,10 @@ public class UserDto extends AbstractDto {
     public UserDto() {
     }
 
-    public UserDto(String email, String password,
-                   String firstName, String lastName,
+    public UserDto(String email,
+                   String password,
+                   String firstName,
+                   String lastName,
                    String phoneNumber) {
         this.email = email;
         this.password = password;

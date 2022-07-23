@@ -2,6 +2,7 @@ package com.eugene.qp.service.dto.validation;
 
 import com.eugene.qp.service.dto.UserDto;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 public class UserDtoValidator implements Validator {
@@ -24,37 +25,32 @@ public class UserDtoValidator implements Validator {
         UserDto userDto = (UserDto) target;
 
         String firstName = userDto.getFirstName();
-        if (firstName.length() > 0 && !firstName.matches(NAME_REGEX)) {
-            errors.rejectValue("firstName", "First name must be between 3 and 25 characters in length " +
-                    "and cannot contain digits or special characters");
+        if (firstName != null && firstName.length() > 0 && !firstName.matches(NAME_REGEX)) {
+            errors.rejectValue("firstName", "error.firstName.invalidFormat");
         }
-
         String lastName = userDto.getLastName();
-        if (lastName.length() > 0 && !lastName.matches(NAME_REGEX)) {
-            errors.rejectValue("lastName", "Last name must be between 3 and 25 characters in length " +
-                    "and cannot contain digits or special characters");
+        if (lastName != null && lastName.length() > 0 && !lastName.matches(NAME_REGEX)) {
+            errors.rejectValue("lastName", "error.lastName.invalidFormat");
         }
-
         String phoneNumber = userDto.getPhoneNumber();
-        if (phoneNumber.length() > 0 && !phoneNumber.matches(PHONE_NUMBER_REGEX)) {
-            errors.rejectValue("phoneNumber", "Phone number must be in international format");
+        if (phoneNumber != null && phoneNumber.length() > 0 && !phoneNumber.matches(PHONE_NUMBER_REGEX)) {
+            errors.rejectValue("phoneNumber", "error.phoneNumber.invalidFormat");
         }
-
+        ValidationUtils.rejectIfEmpty(errors, "email", "error.email.empty");
         String email = userDto.getEmail();
-        if (email.length() == 0) {
-            errors.rejectValue("email", "email is required");
-        } else if (!email.matches(EMAIL_REGEX)) {
-            errors.rejectValue("email", "Invalid email format");
+        if (email != null && !email.matches(EMAIL_REGEX)) {
+            errors.rejectValue("email", "error.email.invalidFormat");
         }
 
+        ValidationUtils.rejectIfEmpty(errors, "password", "error.password.empty");
         String password = userDto.getPassword();
-        if (password.length() < 8 || password.length() > 30) {
-            errors.rejectValue("password", "Password length must be between 8 and 30 characters");
-        } else if (!password.matches(CONTAINS_DIGIT_REGEX) || !password.matches(CONTAINS_LOWERCASE_CHAR_REGEX)
-                || !password.matches(CONTAINS_UPPERCASE_CHAR_REGEX)) {
-
-            errors.rejectValue("password", "Password must contain at least one lowercase, " +
-                    "one uppercase character and one digit");
+        if (password != null) {
+            if (password.length() < 8 || password.length() > 30) {
+                errors.rejectValue("password", "error.password.invalidLength");
+            } else if (!password.matches(CONTAINS_DIGIT_REGEX) || !password.matches(CONTAINS_LOWERCASE_CHAR_REGEX)
+                    || !password.matches(CONTAINS_UPPERCASE_CHAR_REGEX)) {
+                errors.rejectValue("password", "error.password.invalidFormat");
+            }
         }
     }
 }

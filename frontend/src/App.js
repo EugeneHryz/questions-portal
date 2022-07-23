@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { AppContext } from './app-context/appContext';
 import './sass/custom.scss';
 import userService from './service/userService';
@@ -21,6 +21,8 @@ function App() {
       });
     }
   });
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     userService.logIn().then(response => {
@@ -32,9 +34,11 @@ function App() {
         phoneNumber: response.data.phoneNumber
       }
       state.setUser(authenticatedUser);
+      console.log("context updated");
     })
       .catch(error => {
         console.log(error);
+        navigate("/login");
       });
   }, []);
 

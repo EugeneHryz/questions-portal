@@ -11,8 +11,8 @@ public class Question extends AbstractEntity {
     @Column(nullable = false)
     private String question;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "answer_type")
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false, name = "answer_type")
     private AnswerType answerType;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

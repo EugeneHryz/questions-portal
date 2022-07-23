@@ -1,101 +1,117 @@
 import { Toast } from "bootstrap";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../app-context/appContext";
 import Validation from "../login/validation";
 import userService from "../service/userService";
 
-class Profile extends React.Component {
-    static contextType = AppContext;
+function Profile(props) {
 
-    constructor(props, context) {
-        super(props);
+    const context = useContext(AppContext);
+    const [state, setState] = useState({
+        userId: context.user.id,
+        email: context.user.email,
+        firstName: context.user.firstName,
+        lastName: context.user.lastName,
+        phoneNumber: context.user.phoneNumber,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
 
-        this.state = {
-            id: context.user.id,
-            email: context.user.email,
-            firstName: context.user.firstName,
-            lastName: context.user.lastName,
-            phoneNumber: context.user.phoneNumber,
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: '',
+        emailInvalidMsg: '',
+        firstNameInvalidMsg: '',
+        lastNameInvalidMsg: '',
+        phoneNumberInvalidMsg: '',
+        currentPwInvalidMsg: '',
+        newPwInvalidMsg: '',
+        confirmPwInvalidMsg: '',
+        updateProfileResultMsg: ''
+    });
 
-            emailInvalidMsg: '',
-            firstNameInvalidMsg: '',
-            lastNameInvalidMsg: '',
-            phoneNumberInvalidMsg: '',
-            currentPwInvalidMsg: '',
-            newPwInvalidMsg: '',
-            confirmPwInvalidMsg: '',
-            updateProfileResultMsg: ''
-        };
+    const toastRef = React.createRef();
 
-        this.toastRef = React.createRef();
+    useEffect(() => {
+        if (state.updateProfileResultMsg) {
+            // show toast notification
+            const toastDomElmnt = toastRef.current;
+            const toast = Toast.getOrCreateInstance(toastDomElmnt);
+            toast.show();
+        }
+    }, [state.updateProfileResultMsg]);
 
-        this.handleChange = this.handleChange.bind(this);
-        this.validateEmail = this.validateEmail.bind(this);
-        this.validateName = this.validateName.bind(this);
-        this.validateCurrentPassword = this.validateCurrentPassword.bind(this);
-        this.validateNewPassword = this.validateNewPassword.bind(this);
-        this.validateConfirmPassword = this.validateConfirmPassword.bind(this);
-        this.validatePhoneNumber = this.validatePhoneNumber.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.updateUser = this.updateUser.bind(this);
-    }
+    useEffect(() => {
+        setState(prevState => {
+            return {
+                ...prevState,
+                userId: context.user.id,
+                email: context.user.email,
+                firstName: context.user.firstName,
+                lastName: context.user.lastName,
+                phoneNumber: context.user.phoneNumber
+            };
+        })
+    }, [context])
 
-    handleChange(event) {
-        const name = event.target.name;
-        const value = event.target.value;
-        this.setState({ [name]: value });
+    function handleChange(e) {
+        const name = e.target.name;
+        const value = e.target.value;
+        setState(prevState => {
+            return { ...prevState, [name]: value };
+        });
         switch (name) {
             case 'email':
-                this.validateEmail(value);
+                validateEmail(value);
                 break;
             case 'firstName':
-                this.validateName(value, 'firstNameInvalidMsg');
+                validateName(value, 'firstNameInvalidMsg');
                 break;
             case 'lastName':
-                this.validateName(value, 'lastNameInvalidMsg');
+                validateName(value, 'lastNameInvalidMsg');
                 break;
             case 'phoneNumber':
-                this.validatePhoneNumber(value);
+                validatePhoneNumber(value);
                 break;
             case 'currentPassword':
-                this.validateCurrentPassword(value);
+                validateCurrentPassword(value);
                 break;
             case 'newPassword':
-                this.validateNewPassword(value);
+                validateNewPassword(value);
                 break;
             case 'confirmPassword':
-                this.validateConfirmPassword(value);
+                validateConfirmPassword(value);
                 break;
         }
     }
 
-    validateEmail(email) {
+    function validateEmail(email) {
         const result = Validation.validateEmail(email);
-        this.setState({ emailInvalidMsg: result.errorMsg });
+        setState(prevState => {
+            return { ...prevState, emailInvalidMsg: result.errorMsg };
+        });
         return result.valid;
     }
 
-    validateName(name, errorPropertyName) {
+    function validateName(name, errorPropertyName) {
         const result = Validation.validateName(name);
-        this.setState({ [errorPropertyName]: result.errorMsg });
+        setState(prevState => {
+            return { ...prevState, [errorPropertyName]: result.errorMsg };
+        });
         return result.valid;
     }
 
-    validateCurrentPassword(password) {
+    function validateCurrentPassword(password) {
         let valid = true;
         let errorMsg = '';
         if (password.length === 0) {
             errorMsg = 'Password is required';
             valid = false;
         }
-        this.setState({ currentPwInvalidMsg: errorMsg });
+        setState(prevState => {
+            return { ...prevState, currentPwInvalidMsg: errorMsg };
+        });
         return valid;
     }
 
-    validateNewPassword(password) {
+    function validateNewPassword(password) {
         let valid = true;
         let errorMsg = '';
         if (password.length > 0) {
@@ -104,12 +120,14 @@ class Profile extends React.Component {
             errorMsg = result.errorMsg;
             valid = result.valid;
         }
-        this.setState({ newPwInvalidMsg: errorMsg });
+        setState(prevState => {
+            return { ...prevState, newPwInvalidMsg: errorMsg };
+        });
         return valid;
     }
 
-    validateConfirmPassword(confirmPw) {
-        const password = this.state.newPassword;
+    function validateConfirmPassword(confirmPw) {
+        const password = state.newPassword;
         let isValid = false;
         let errorMsg = '';
         if (password !== confirmPw) {
@@ -117,38 +135,42 @@ class Profile extends React.Component {
         } else {
             isValid = true;
         }
-        this.setState({ confirmPwInvalidMsg: errorMsg });
+        setState(prevState => {
+            return { ...prevState, confirmPwInvalidMsg: errorMsg };
+        });
         return isValid;
     }
 
-    validatePhoneNumber(phoneNumber) {
+    function validatePhoneNumber(phoneNumber) {
         const result = Validation.validatePhoneNumber(phoneNumber);
-        this.setState({ phoneNumberInvalidMsg: result.errorMsg });
+        setState(prevState => {
+            return { ...prevState, phoneNumberInvalidMsg: result.errorMsg };
+        });
         return result.valid;
     }
 
-    handleSubmit(event, setUser) {
-        const allIsValid = this.validateEmail(this.state.email)
-            && this.validateName(this.state.firstName, 'firstNameInvalidMsg')
-            && this.validateName(this.state.lastName, 'lastNameInvalidMsg')
-            && this.validatePhoneNumber(this.state.phoneNumber)
-            && this.validateCurrentPassword(this.state.currentPassword)
-            && this.validateNewPassword(this.state.newPassword)
-            && this.validateConfirmPassword(this.state.confirmPassword);
+    function handleSubmit(event, setUser) {
+        const allIsValid = validateEmail(state.email)
+            && validateName(state.firstName, 'firstNameInvalidMsg')
+            && validateName(state.lastName, 'lastNameInvalidMsg')
+            && validatePhoneNumber(state.phoneNumber)
+            && validateCurrentPassword(state.currentPassword)
+            && validateNewPassword(state.newPassword)
+            && validateConfirmPassword(state.confirmPassword);
         
         if (allIsValid) {
-            this.updateUser(setUser);
+            updateUser(setUser);
         }
         event.preventDefault();
     }
 
-    updateUser(setUser) {
-        this.setState({
-            updateProfileResultMsg: ''
+    function updateUser(setUser) {
+        setState(prevState => {
+            return { ...prevState, updateProfileResultMsg: ''};
         });
-        userService.update(this.state.id, this.state.email,
-            this.state.currentPassword, this.state.firstName,
-            this.state.lastName, this.state.phoneNumber).then((response) => {
+        userService.update(state.userId, state.email,
+            state.currentPassword, state.firstName,
+            state.lastName, state.phoneNumber).then((response) => {
                 console.log("User updated successfully!");
                 const successMsg = "Profile updated successfully!";
                 
@@ -159,9 +181,8 @@ class Profile extends React.Component {
                     phoneNumber: response.data.phoneNumber,
                     currentPassword: ''
                 };
-                this.setState({
-                    updateProfileResultMsg: successMsg,
-                    ...updatedUser
+                setState(prevState => {
+                    return { ...prevState, updateProfileResultMsg: successMsg, ...updatedUser };
                 });
                 setUser(updatedUser);
             })
@@ -169,133 +190,119 @@ class Profile extends React.Component {
                 console.log(error);
 
                 const errorMsg = "Unable to update user profile";
-                this.setState({ updateProfileResultMsg: errorMsg });
+                setState(prevState => {
+                    return { ...prevState, updateProfileResultMsg: errorMsg };
+                });
             });
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.updateProfileResultMsg && this.state.updateProfileResultMsg 
-            !== prevState.updateProfileResultMsg) {
-            // show toast notification
-            const toastDomElmnt = this.toastRef.current;
-            let toast = Toast.getInstance(toastDomElmnt);
-            if (!toast) {
-                toast = new Toast(toastDomElmnt);
-            }
-            toast.show();
-        }
-    }
-
-    render() {
-        return (
-            <div className="card profile-card">
-                <div className="card-header">
-                    Account details
-                </div>
-                <div className="container card-body">
-                    <div className="row">
-                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
-                            <form id="editProfileForm" onSubmit={(e) => this.handleSubmit(e, this.context.setUser)}
-                                noValidate>
-                                <div className="mb-2 position-relative">
-                                    <label htmlFor="firstName" className="form-label">First name</label>
-                                    <input type="text" name="firstName" className={'form-control ' +
-                                        (this.state.firstNameInvalidMsg ? 'is-invalid' : '')} id="firstName"
-                                           value={this.state.firstName} onChange={this.handleChange} />
-                                    <div className="invalid-tooltip">
-                                        {this.state.firstNameInvalidMsg}
-                                    </div>
-                                </div>
-
-                                <div className="mb-2 position-relative">
-                                    <label htmlFor="lastName" className="form-label">Last name</label>
-                                    <input type="text" name="lastName" className={'form-control ' +
-                                        (this.state.lastNameInvalidMsg ? 'is-invalid' : '')} id="lastName"
-                                           value={this.state.lastName} onChange={this.handleChange} />
-                                    <div className="invalid-tooltip">
-                                        {this.state.lastNameInvalidMsg}
-                                    </div>
-                                </div>
-
-                                <div className="mb-2 position-relative">
-                                    <label htmlFor="email" className="form-label">Email address
-                                        <span className="text-danger"> *</span>
-                                    </label>
-                                    <input type="email" name="email" className={'form-control ' +
-                                        (this.state.emailInvalidMsg ? 'is-invalid' : '')} id="email"
-                                           value={this.state.email} onChange={this.handleChange} />
-                                    <div className="invalid-tooltip">
-                                        {this.state.emailInvalidMsg}
-                                    </div>
-                                </div>
-
-                                <div className="mb-2 position-relative">
-                                    <label htmlFor="phoneNumber" className="form-label">Phone number</label>
-                                    <input type="text" name="phoneNumber" className={'form-control ' +
-                                        (this.state.phoneNumberInvalidMsg ? 'is-invalid' : '')} id="phoneNumber"
-                                           value={this.state.phoneNumber} onChange={this.handleChange} />
-                                    <div className="invalid-tooltip">
-                                        {this.state.phoneNumberInvalidMsg}
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+    return (
+        <div className="card profile-card">
+            <div className="card-header">
+                Account details
+            </div>
+            <div className="container card-body">
+                <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <form id="editProfileForm" onSubmit={(e) => handleSubmit(e, context.setUser)}
+                            noValidate>
                             <div className="mb-2 position-relative">
-                                <label htmlFor="currentPassword" className="form-label">Current password
+                                <label htmlFor="firstName" className="form-label">First name</label>
+                                <input type="text" name="firstName" className={'form-control ' +
+                                    (state.firstNameInvalidMsg ? 'is-invalid' : '')} id="firstName"
+                                    value={state.firstName} onChange={handleChange} />
+                                <div className="invalid-tooltip">
+                                    {state.firstNameInvalidMsg}
+                                </div>
+                            </div>
+
+                            <div className="mb-2 position-relative">
+                                <label htmlFor="lastName" className="form-label">Last name</label>
+                                <input type="text" name="lastName" className={'form-control ' +
+                                    (state.lastNameInvalidMsg ? 'is-invalid' : '')} id="lastName"
+                                    value={state.lastName} onChange={handleChange} />
+                                <div className="invalid-tooltip">
+                                    {state.lastNameInvalidMsg}
+                                </div>
+                            </div>
+
+                            <div className="mb-2 position-relative">
+                                <label htmlFor="email" className="form-label">Email address
                                     <span className="text-danger"> *</span>
                                 </label>
-                                <input type="password" name="currentPassword" className={'form-control ' +
-                                    (this.state.currentPwInvalidMsg ? 'is-invalid' : '')} id="currentPassword"
-                                       value={this.state.currentPassword} onChange={this.handleChange} form="editProfileForm"/>
+                                <input type="email" name="email" className={'form-control ' +
+                                    (state.emailInvalidMsg ? 'is-invalid' : '')} id="email"
+                                    value={state.email} onChange={handleChange} />
                                 <div className="invalid-tooltip">
-                                    {this.state.currentPwInvalidMsg}
+                                    {state.emailInvalidMsg}
                                 </div>
                             </div>
 
                             <div className="mb-2 position-relative">
-                                <label htmlFor="newPassword" className="form-label">New password</label>
-                                <input type="password" name="newPassword" className={'form-control ' +
-                                    (this.state.newPwInvalidMsg ? 'is-invalid' : '')} id="newPassword"
-                                       value={this.state.newPassword} onChange={this.handleChange} form="editProfileForm"/>
+                                <label htmlFor="phoneNumber" className="form-label">Phone number</label>
+                                <input type="text" name="phoneNumber" className={'form-control ' +
+                                    (state.phoneNumberInvalidMsg ? 'is-invalid' : '')} id="phoneNumber"
+                                    value={state.phoneNumber} onChange={handleChange} />
                                 <div className="invalid-tooltip">
-                                    {this.state.newPwInvalidMsg}
+                                    {state.phoneNumberInvalidMsg}
                                 </div>
                             </div>
+                        </form>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <div className="mb-2 position-relative">
+                            <label htmlFor="currentPassword" className="form-label">Current password
+                                <span className="text-danger"> *</span>
+                            </label>
+                            <input type="password" name="currentPassword" className={'form-control ' +
+                                (state.currentPwInvalidMsg ? 'is-invalid' : '')} id="currentPassword"
+                                value={state.currentPassword} onChange={handleChange} form="editProfileForm" />
+                            <div className="invalid-tooltip">
+                                {state.currentPwInvalidMsg}
+                            </div>
+                        </div>
 
-                            <div className="mb-2 position-relative">
-                                <label htmlFor="confirmPassword" className="form-label">Confirm new password</label>
-                                <input type="password" name="confirmPassword" className={'form-control ' +
-                                    (this.state.confirmPwInvalidMsg ? 'is-invalid' : '')} id="confirmPassword"
-                                       value={this.state.confirmPassword} onChange={this.handleChange} form="editProfileForm"/>
-                                <div className="invalid-tooltip">
-                                    {this.state.confirmPwInvalidMsg}
-                                </div>
+                        <div className="mb-2 position-relative">
+                            <label htmlFor="newPassword" className="form-label">New password</label>
+                            <input type="password" name="newPassword" className={'form-control ' +
+                                (state.newPwInvalidMsg ? 'is-invalid' : '')} id="newPassword"
+                                value={state.newPassword} onChange={handleChange} form="editProfileForm" />
+                            <div className="invalid-tooltip">
+                                {state.newPwInvalidMsg}
                             </div>
                         </div>
-                        
-                    </div>
-                    <div className="row mt-3">
-                        <div className="col">
-                            <button type="submit" form="editProfileForm" className="btn btn-secondary px-4">Save</button>
+
+                        <div className="mb-2 position-relative">
+                            <label htmlFor="confirmPassword" className="form-label">Confirm new password</label>
+                            <input type="password" name="confirmPassword" className={'form-control ' +
+                                (state.confirmPwInvalidMsg ? 'is-invalid' : '')} id="confirmPassword"
+                                value={state.confirmPassword} onChange={handleChange} form="editProfileForm" />
+                            <div className="invalid-tooltip">
+                                {state.confirmPwInvalidMsg}
+                            </div>
                         </div>
                     </div>
+
                 </div>
-                <div className="toast-container position-fixed bottom-0 end-0 p-3">
-                    <div id="notificationToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true"
-                        ref={this.toastRef}>
-                        <div className="toast-header">
-                            <strong className="me-auto">Notification</strong>
-                            <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"/>
-                        </div>
-                        <div className="toast-body">
-                            {this.state.updateProfileResultMsg}
-                        </div>
+                <div className="row mt-3">
+                    <div className="col">
+                        <button type="submit" form="editProfileForm" className="btn btn-secondary px-4">Save</button>
                     </div>
                 </div>
             </div>
-        );
-    }
+            <div className="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="notificationToast" className="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                    ref={toastRef}>
+                    <div className="toast-header">
+                        <strong className="me-auto">Notification</strong>
+                        <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close" />
+                    </div>
+                    <div className="toast-body">
+                        {state.updateProfileResultMsg}
+                    </div>
+                </div>
+            </div>
+        </div>);
 }
 
 export default Profile;

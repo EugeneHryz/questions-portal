@@ -8,16 +8,10 @@ import java.util.stream.Collectors;
 
 public class QuestionDtoConverter extends AbstractTwoWayConverter<Question, QuestionDto> {
 
-    private final AnswerTypeDtoConverter answerTypeConverter;
-
-    public QuestionDtoConverter(AnswerTypeDtoConverter answerTypeConverter) {
-        this.answerTypeConverter = answerTypeConverter;
-    }
-
     @Override
     protected QuestionDto convertTo(Question source) {
         QuestionDto questionDto = new QuestionDto(source.getQuestion(),
-                answerTypeConverter.convertTo(source.getAnswerType()),
+                source.getAnswerType(),
                 source.getFromUser().getId(),
                 source.getToUser().getEmail(),
                 source.getAnswerOptions().stream().map(AnswerOption::getOption).collect(Collectors.toSet()));
@@ -28,7 +22,7 @@ public class QuestionDtoConverter extends AbstractTwoWayConverter<Question, Ques
     @Override
     protected Question convertBack(QuestionDto source) {
         Question question = new Question(source.getQuestion(),
-                answerTypeConverter.convertBack(source.getAnswerType()),
+                source.getAnswerType(),
                 null, null,
                 source.getAnswerOptions().stream().map(AnswerOption::new).collect(Collectors.toSet()));
         question.setId(source.getId());
