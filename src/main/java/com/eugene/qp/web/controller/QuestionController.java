@@ -56,6 +56,15 @@ public class QuestionController {
         return ResponseEntity.created(locationUri).body(createdQuestion);
     }
 
+    @PutMapping(value = "/{id}", consumes = {"application/json"})
+    public ResponseEntity<QuestionDto> updateQuestion(@PathVariable long id, @RequestBody @Valid QuestionDto questionDto)
+            throws UserNotFoundException, QuestionNotFoundException {
+        questionDto.setId(id);
+        QuestionDto updatedQuestion = questionService.updateQuestion(questionDto);
+
+        return ResponseEntity.ok().body(updatedQuestion);
+    }
+
     @DeleteMapping(value = "/{id}")
     public void deleteQuestion(@PathVariable long id) throws QuestionNotFoundException {
         questionService.deleteQuestion(id);

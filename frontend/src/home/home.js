@@ -21,13 +21,20 @@ function HomePage(props) {
         showModal: showModal,
         hideModal: hideModal,
 
-        showAddEditQuestionModal: false,
-        editQuestionModal: false,
         password: '',
         passwordInvalidMsg: '',
         failedToDeleteMsg: ''
     });
-    const [reloadQuestions, setReloadQuestions] = useState(false);
+    const [addEditQuestionModalShown, setAddEditQuestionModalShown] = useState(false);
+    // true - edit question, false - add question
+    const [editQuestion, setEditQuestion] = useState(false);
+    const [selectedQuestion, setSelectedQuestion] = useState({
+        id: '',
+        toUserEmail: '',
+        question: '',
+        answerType: '',
+        answerOptions: []
+    });
     const navigate = useNavigate();
 
     function handleChange(e) {
@@ -57,7 +64,6 @@ function HomePage(props) {
         if (validatePassword(state.password)) {
             deleteAccount(userId, setUser);
         }
-
         e.preventDefault();
     }
 
@@ -76,25 +82,25 @@ function HomePage(props) {
         })
     }
 
-    const showAddEditQuestionModal = () => {
-        setState(prevState => {
-            return { ...prevState, showAddEditQuestionModal: true };
-        });
-    };
+    function startEditingQuestion(q) {
+        setEditQuestion(true);
+        setSelectedQuestion(old => ({ ...old, ...q }));
+        setAddEditQuestionModalShown(true);
+    }
 
-    const hideAddEditQuestionModal = () => {
-        setState(prevState => {
-            return { ...prevState, showAddEditQuestionModal: false };
-        });
-    };
+    function startAddingQuestion() {
+        setEditQuestion(false);
+        setSelectedQuestion({});
+        setAddEditQuestionModalShown(true);
+    }
 
     return (<div className="home-page">
         <Header showModal={state.showModal} />
-        <Outlet context={[ showAddEditQuestionModal, reloadQuestions ]} />
+        <Outlet context={[addEditQuestionModalShown, startEditingQuestion, startAddingQuestion]} />
 
         <AppContext.Consumer>
             {({ user, setUser }) => (
-                <div className="modal fade delete-account-modal" id="confirmationModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+                <div className="modal fade delete-account-modal" id="confirmationModal" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
                     ref={modalRef}>
                     <div className="modal-dialog modal-sm modal-dialog-centered">
                         <div className="modal-content">
@@ -128,10 +134,10 @@ function HomePage(props) {
         </AppContext.Consumer>
 
         <AddEditQuestionModal 
-            shouldShow={state.showAddEditQuestionModal} 
-            edit={state.editQuestionModal} 
-            hide={hideAddEditQuestionModal} 
-            setReloadQuestions={setReloadQuestions} />
+            show={addEditQuestionModalShown}
+            edit={editQuestion} 
+            hide={() => setAddEditQuestionModalShown(false)} 
+            question={selectedQuestion} />
     </div>);
 }
 

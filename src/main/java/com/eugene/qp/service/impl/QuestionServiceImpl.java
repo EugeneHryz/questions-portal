@@ -2,6 +2,7 @@ package com.eugene.qp.service.impl;
 
 import com.eugene.qp.repository.dao.QuestionRepository;
 import com.eugene.qp.repository.dao.UserRepository;
+import com.eugene.qp.repository.entity.AnswerOption;
 import com.eugene.qp.repository.entity.AnswerType;
 import com.eugene.qp.repository.entity.Question;
 import com.eugene.qp.repository.entity.User;
@@ -19,6 +20,8 @@ import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -55,6 +58,33 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question createdQuestion = questionRepository.save(questionToCreate);
         return conversionService.convert(createdQuestion, QuestionDto.class);
+    }
+
+    @Override
+    public QuestionDto updateQuestion(QuestionDto question) throws QuestionNotFoundException, UserNotFoundException {
+        Optional<Question> oldQuestionOptional = questionRepository.findById(question.getId());
+        if (oldQuestionOptional.isEmpty()) {
+            throw new QuestionNotFoundException();
+        }
+        Question oldQuestion = oldQuestionOptional.get();
+
+        if (!oldQuestion.getToUser().getEmail().equals(question.getToUserEmail())) {
+            Optional<User> newToUser = userRepository.findByEmail(question.getToUserEmail());
+            if (newToUser.isEmpty()) {
+                throw new UserNotFoundException();
+            }
+            oldQuestion.setToUser(newToUser.get());
+        }
+        oldQuestion.setQuestion(question.getQuestion());
+        oldQuestion.setAnswerType(question.getAnswerType());
+
+        Set<AnswerOption> newAnswerOptions = question.getAnswerOptions()
+                .stream().map(AnswerOption::new)
+                        .collect(Collectors.toSet());
+        oldQuestion.setAnswerOptions(newAnswerOptions);
+
+        Question updatedQuestion = questionRepository.save(oldQuestion);
+        return conversionService.convert(updatedQuestion, QuestionDto.class);
     }
 
     @Override

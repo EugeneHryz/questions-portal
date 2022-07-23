@@ -20,9 +20,11 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
+@Transactional
 @PropertySource("classpath:message.properties")
 public class UserServiceImpl implements UserService {
 

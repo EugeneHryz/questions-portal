@@ -8,13 +8,15 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import { Link, useLocation } from 'react-router-dom';
 import { formatAnswerType } from "../util/util";
+import ConfirmDialog from "../home/confirmDialog";
 
 const PAGE_SIZE = 4;
 
 function YourQuestions(props) {
       
     const context = useContext(AppContext);
-    const [ showAddEditQuestionModal, reloadQuestions ] = useOutletContext();
+    const [addEditQuestionModalShown, startEditingQuestion, startAddingQuestion] = useOutletContext();
+
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const page = parseInt(Number(query.get('page') || 1), 10);
@@ -22,14 +24,23 @@ function YourQuestions(props) {
     const [state, setState] = useState({
         pageCount: 0,
         currentPage: page,
-        numberOfElements: -1
+        numberOfElements: -1,
+        
+        showConfirmDialog: false
     });
     const [questions, setQuestions] = useState([]);
+    const [selectedQuestion, setSelectedQuestion] = useState(-1);
+
+    useEffect(() => {
+        if (!addEditQuestionModalShown) {
+            loadCurrentPage();
+        }
+    }, [addEditQuestionModalShown]);
 
     useEffect(() => {
         loadCurrentPage();
 
-    }, [state.currentPage, context, reloadQuestions]);
+    }, [state.currentPage, context]);
 
     function handlePageChange(e, newValue) {
         setState(prevState => {
@@ -39,17 +50,41 @@ function YourQuestions(props) {
 
     function handleQuestionDelete(item) {
         const questionId = item.id;
-        questionService.deleteQuestion(questionId).then(response => {
-            if (state.numberOfElements === 1 && state.currentPage !== 1) {
-                setState(prevState => {
-                    return { ...prevState, currentPage: prevState.currentPage - 1 };
+        setSelectedQuestion(questionId);
+
+        // show confirmation dialog
+        setState(prevState => {
+            return { ...prevState, showConfirmDialog: !prevState.showConfirmDialog };
+        });
+    }
+
+    function handleEditQuestion(item) {
+        const questionId = item.id;
+        setSelectedQuestion(questionId);
+
+        startEditingQuestion(item);
+    }
+
+    function onDialogResult(result) {
+        if (result) {
+            questionService.deleteQuestion(selectedQuestion).then(response => {
+                if (state.numberOfElements === 1 && state.currentPage !== 1) {
+                    setState(prevState => {
+                        return { ...prevState, currentPage: prevState.currentPage - 1 };
+                    });
+                } else {
+                    loadCurrentPage();
+                }
+            })
+                .catch(error => {
+                    console.log(error);
                 });
-            } else {
-                loadCurrentPage();
-            }
-        })
-        .catch(error => {
-            console.log(error);
+        }
+    }
+
+    function onDialogDismissed() {
+        setState(prevState => {
+            return { ...prevState, showConfirmDialog: false };
         });
     }
 
@@ -76,7 +111,7 @@ function YourQuestions(props) {
         <div className="card questions-page">
             <div className="card-header d-flex justify-content-between align-self-stretch">
                 Your questions
-                <button className="btn btn-secondary align-self-end" onClick={showAddEditQuestionModal}>
+                <button className="btn btn-secondary align-self-end" onClick={() => startAddingQuestion()}>
                     <i className="fa-solid fa-plus"></i> Create
                 </button>
             </div>
@@ -103,7 +138,7 @@ function YourQuestions(props) {
                                 <td className="answer-col"></td>
                                 <td className="actions-col">
                                     <IconButton title="edit" sx={{ mr: '-8px', fontSize: '22px' }}
-                                        edge="end">
+                                        edge="end" onClick={() => startEditingQuestion(q)}>
                                         <EditRoundedIcon />
                                     </IconButton>
                                     <IconButton title="delete" sx={{ mr: '-8px', fontSize: '22px' }}
@@ -122,7 +157,8 @@ function YourQuestions(props) {
             </div>
             
             <div className={'card-body ' + (state.numberOfElements === 0 ? 'opacity-0' : '')}>
-                <Pagination count={state.pageCount}
+                <Pagination 
+                    count={state.pageCount}
                     page={state.currentPage}
                     onChange={handlePageChange}
                     shape="rounded"
@@ -135,6 +171,13 @@ function YourQuestions(props) {
                             {...item} />
                     )} />
             </div>
+            <ConfirmDialog 
+                title="Really delete?" 
+                actionBtn="Delete" 
+                cancelBtn="No"
+                show={state.showConfirmDialog}
+                onResult={onDialogResult}
+                onDismiss={onDialogDismissed} />
         </div>);
 
 }

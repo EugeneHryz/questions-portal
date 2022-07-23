@@ -42,6 +42,16 @@ class QuestionService {
     deleteQuestion(id) {
         return axios.delete(QUESTIONS_URL + "/" + id, options);
     }
+
+    editQuestion(id, toUserEmail, question, answerType, answerOptions) {
+        const questionToEdit = {
+            toUserEmail,
+            question,
+            answerType,
+            answerOptions
+        };
+        return axios.put(QUESTIONS_URL + "/" + id, JSON.stringify(questionToEdit), options);
+    }
 }
 
 export default new QuestionService();

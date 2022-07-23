@@ -9,6 +9,7 @@ import userService from "../service/userService";
 import React from 'react';
 import { AppContext } from "../app-context/appContext";
 import DeleteRoundedIcon from '@mui/icons-material/ClearRounded';
+import { formatAnswerType } from '../util/util.js';
 
 function renderItem(item, handleRemoveItem) {
     return (
@@ -43,36 +44,65 @@ function AddEditQuestionModal(props) {
     const [userSelectOpen, setUserSelectOpen] = useState(false);
     const [usersLoading, setUsersLoading] = useState(false);
     const [selectedAnswerType, setSelectedAnswerType] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [question, setQuestion] = useState('');
-    
+    const [dontNeedOptions, setDontNeedOptions] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(props.edit ? props.question.toUserEmail : '');
+    const [question, setQuestion] = useState(props.edit ? props.question.question : '');
+
+    // question id to edit
+    const [questionId, setQuestionId] = useState(-1);
 
     useEffect(() => {
-        if (props.shouldShow) {
+        if (props.show) {
             const modal = Modal.getOrCreateInstance(modalRef.current);
             modal.show();
         }
-        modalRef.current.addEventListener('hidden.bs.modal', function (event) {
+        const hiddenListener = function (e) {
             props.hide();
-        });
-    }, [props.shouldShow]);
+        };
+        modalRef.current.addEventListener('hidden.bs.modal', hiddenListener);
+        return () => {
+            if (modalRef.current) {
+                modalRef.current.removeEventListener('hidden.bs.modal', hiddenListener);
+            }
+        };
+    }, [props.show]);
 
     useEffect(() => {
+        const newQuestionId = props.edit ? props.question.id : -1;
+        const newSelectedUser = props.edit ? props.question.toUserEmail : '';
+        const newQuestion = props.edit ? props.question.question : '';
+        const newAnswerType = props.edit ? props.question.answerType : '';
+        const newAnswerOptions = props.edit ? props.question.answerOptions : [];
+
+        setSelectedUser(newSelectedUser);
+        setQuestion(newQuestion);
+        setSelectedAnswerType(newAnswerType);
+        setState(prevState => {
+            return { ...prevState, addedOptions: newAnswerOptions, answerOption: '' };
+        });
+        setQuestionId(newQuestionId);
+
+        const noOptions = ['SINGLE_LINE_TEXT', 'MULTILINE_TEXT', 'DATE'].includes(newAnswerType);
+        setDontNeedOptions(noOptions);
+
         questionService.getAllAnswerTypes().then((response) => {
             setState(prevState => {
                 return { ...prevState, answerTypes: response.data };
             });
-            setSelectedAnswerType(response.data[0]);
+            if (!props.edit) {
+                const noOptions = ['SINGLE_LINE_TEXT', 'MULTILINE_TEXT', 'DATE'].includes(response.data[0]);
+                setDontNeedOptions(noOptions);
+                setSelectedAnswerType(response.data[0]);
+            }
         })
         .catch((error) => {
             console.log(error);
         })
-    }, []);
+    }, [props.question]);
 
     function handleChange(e) {
         const name = e.target.name;
         const value = e.target.value;
-
         setState(prevState => {
             return { ...prevState, [name]: value };
         });
@@ -97,8 +127,9 @@ function AddEditQuestionModal(props) {
         setUsersLoading(true);
 
         userService.searchUsersByEmail(newValue).then(response => {
+            const userEmails = response.data.content.map(u => u.email);
             setState(prevState => {
-                return { ...prevState, users: response.data.content };
+                return { ...prevState, users: userEmails };
             });
         })
         .catch(error => {
@@ -157,24 +188,41 @@ function AddEditQuestionModal(props) {
             && validateOptionsList(selectedAnswerType, state.addedOptions);
 
         if (allIsValid) {
-            questionService.createQuestion(selectedUser.email, userId, 
-                question, selectedAnswerType, 
-                state.addedOptions)
-                .then(response => {
-                    const modal = Modal.getOrCreateInstance(modalRef.current);
-                    modal.hide();
-                    props.setReloadQuestions(prevValue => !prevValue);
-                })
-                .catch(error => {
-                    console.log(error);
-                });
+            if (props.edit) {
+                editQuestion();
+            } else {
+                addQuestion(userId);
+            }
         }
         e.preventDefault();
     }
 
-    function formatAnswerType(answerType) {
-        const s = answerType.replaceAll('_', ' ').toLowerCase();
-        return s && s[0].toUpperCase() + s.slice(1);
+    function addQuestion(userId) {
+        questionService.createQuestion(selectedUser, 
+            userId,
+            question, 
+            selectedAnswerType,
+            state.addedOptions).then(response => {
+                const modal = Modal.getOrCreateInstance(modalRef.current);
+                modal.hide();
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }
+
+    function editQuestion() {
+        questionService.editQuestion(questionId, 
+            selectedUser, 
+            question, 
+            selectedAnswerType, 
+            state.addedOptions).then(response => {
+                const modal = Modal.getOrCreateInstance(modalRef.current);
+                modal.hide();
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     return (<div className="modal fade" id="addEditQuestionModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
@@ -182,7 +230,7 @@ function AddEditQuestionModal(props) {
         <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title" id="modalHeader">{ props.edit ? 'Edit question' : 'Add question'}</h5>
+                    <h5 className="modal-title" id="modalHeader">{props.edit ? 'Edit question' : 'Add question'}</h5>
                     <button id="closeModalBtn" type="button" className="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div className="modal-body">
@@ -203,8 +251,8 @@ function AddEditQuestionModal(props) {
                                             onOpen={() => { setUserSelectOpen(true); }}
                                             onClose={() => { setUserSelectOpen(false); }}
                                             loading={usersLoading}
-                                            isOptionEqualToValue={(option, value) => option.email === value.email}
-                                            getOptionLabel={(option) => option ? option.email : ''}
+                                            isOptionEqualToValue={(option, value) => option === value}
+                                            getOptionLabel={(option) => option ? option : ''}
                                             options={state.users} renderInput={(params) =>
                                                 <TextField {...params} label="User"
                                                     error={state.toUserInvalidMsg.length !== 0}
@@ -247,11 +295,13 @@ function AddEditQuestionModal(props) {
                                             getOptionLabel={(option) => formatAnswerType(option)}
                                             value={selectedAnswerType}
                                             onChange={(e, newValue) => {
-                                                if ([1, 2, 6].includes(newValue.id)) {
+                                                const noOptions = ['SINGLE_LINE_TEXT', 'MULTILINE_TEXT', 'DATE'].includes(newValue);
+                                                if (noOptions) {
                                                     setState(prevState => {
                                                         return { ...prevState, addedOptions: [] };
                                                     });
                                                 }
+                                                setDontNeedOptions(noOptions);
                                                 setSelectedAnswerType(newValue);
                                             }}
                                             options={state.answerTypes} renderInput={(params) =>
@@ -270,7 +320,7 @@ function AddEditQuestionModal(props) {
                                             value={state.answerOption}
                                             name="answerOption"
                                             onChange={handleChange}
-                                            disabled={[1, 2, 6].includes(selectedAnswerType.id)}
+                                            disabled={dontNeedOptions}
                                             error={state.optionsInvalidMsg.length !== 0}
                                             helperText={state.optionsInvalidMsg}
                                             InputProps={{
@@ -279,7 +329,7 @@ function AddEditQuestionModal(props) {
                                                         addOptionItem(state.answerOption);
                                                     }
                                                 }}
-                                                    disabled={[1, 2, 6].includes(selectedAnswerType.id)}>Add</Button>
+                                                    disabled={dontNeedOptions}>Add</Button>
                                             }} />
                                     </div>
                                 </div>
@@ -308,7 +358,7 @@ function AddEditQuestionModal(props) {
                         
                     <div className="d-flex justify-content-end mt-3">
                         <button className="btn btn-grey me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button form="addQuestionForm" className="btn btn-primary" type="submit">Add</button>
+                        <button form="addQuestionForm" className="btn btn-primary" type="submit">{ props.edit ? 'Edit' : 'Add'}</button>
                     </div>
                 </div>
             </div>
