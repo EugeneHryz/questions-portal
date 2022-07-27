@@ -38,11 +38,18 @@ public class QuestionController {
         return questionService.getAllAnswerTypes();
     }
 
-    @GetMapping(produces = {"application/json"})
-    public Page<QuestionDto> getUserQuestions(@RequestParam(value = "userId") long userId,
-                                              @RequestParam(value = "page", defaultValue = "0") int page,
-                                              @RequestParam(value = "size", defaultValue = "4") int size) {
-        return questionService.getUserQuestionsPaginated(userId, page, size);
+    @GetMapping(value = "/from-user", produces = {"application/json"})
+    public Page<QuestionDto> getQuestionsFromUser(@RequestParam(value = "userId") long userId,
+                                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                                  @RequestParam(value = "size", defaultValue = "4") int size) {
+        return questionService.getQuestionsFromUserPaginated(userId, page, size);
+    }
+
+    @GetMapping(value = "/to-user", produces = {"application/json"})
+    public Page<QuestionDto> getQuestionsToUser(@RequestParam(value = "userId") long userId,
+                                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                                @RequestParam(value = "size", defaultValue = "4") int size) {
+        return questionService.getQuestionsToUserPaginated(userId, page, size);
     }
 
     @PostMapping(consumes = {"application/json"})
@@ -57,12 +64,13 @@ public class QuestionController {
     }
 
     @PutMapping(value = "/{id}", consumes = {"application/json"})
-    public ResponseEntity<QuestionDto> updateQuestion(@PathVariable long id, @RequestBody @Valid QuestionDto questionDto)
+    public QuestionDto updateQuestion(@PathVariable long id,
+                                                      @RequestBody @Valid QuestionDto questionDto)
             throws UserNotFoundException, QuestionNotFoundException {
         questionDto.setId(id);
         QuestionDto updatedQuestion = questionService.updateQuestion(questionDto);
 
-        return ResponseEntity.ok().body(updatedQuestion);
+        return updatedQuestion;
     }
 
     @DeleteMapping(value = "/{id}")

@@ -48,6 +48,7 @@ public class AppSecurityConfig {
                 .permitAll()
                 .addLogoutHandler(getLogoutHandler())
                 .logoutSuccessHandler((new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)));
+
         return http.build();
     }
 

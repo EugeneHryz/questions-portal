@@ -16,7 +16,9 @@ public interface QuestionService {
 
     QuestionDto updateQuestion(QuestionDto question) throws QuestionNotFoundException, UserNotFoundException;
 
-    Page<QuestionDto> getUserQuestionsPaginated(long userId, int page, int size);
+    Page<QuestionDto> getQuestionsFromUserPaginated(long fromUserId, int page, int size);
+
+    Page<QuestionDto> getQuestionsToUserPaginated(long toUserId, int page, int size);
 
     void deleteQuestion(long id) throws QuestionNotFoundException;
 }

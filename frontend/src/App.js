@@ -1,8 +1,10 @@
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppContext } from './app-context/appContext';
 import './sass/custom.scss';
 import userService from './service/userService';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
 
@@ -43,11 +45,13 @@ function App() {
   }, []);
 
   return (
-    <AppContext.Provider value={state}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <AppContext.Provider value={state}>
       <div className='page-body'>
         <Outlet />
       </div>
     </AppContext.Provider>
+    </LocalizationProvider>
   );
 }
 

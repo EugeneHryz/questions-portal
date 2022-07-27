@@ -18,7 +18,9 @@ class QuestionService {
     createQuestion(toUserEmail, fromUserId, question, answerType, answerOptions) {
         const questionToCreate = {
             toUserEmail,
-            fromUserId,
+            fromUser: {
+                id: fromUserId
+            },
             question,
             answerType,
             answerOptions
@@ -26,7 +28,7 @@ class QuestionService {
         return axios.post(QUESTIONS_URL, JSON.stringify(questionToCreate), options);
     }
 
-    getUserQuestionsPaginated(userId, page, size) {
+    getQuestionsFromUserPaginated(userId, page, size) {
         const options = {
             withCredentials: true,
             params: {
@@ -36,7 +38,7 @@ class QuestionService {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         }
-        return axios.get(QUESTIONS_URL, options);
+        return axios.get(QUESTIONS_URL + "/from-user", options);
     }
 
     deleteQuestion(id) {
@@ -51,6 +53,19 @@ class QuestionService {
             answerOptions
         };
         return axios.put(QUESTIONS_URL + "/" + id, JSON.stringify(questionToEdit), options);
+    }
+
+    getQuestionsToUserPaginated(userId, page, size) {
+        const options = {
+            withCredentials: true,
+            params: {
+                userId, page, size
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }
+        return axios.get(QUESTIONS_URL + "/to-user", options);
     }
 }
 

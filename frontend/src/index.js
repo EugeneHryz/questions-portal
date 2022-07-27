@@ -11,6 +11,7 @@ import SignUpForm from './login/signup';
 import HomePage from './home/home';
 import Profile from './profile/profile';
 import YourQuestions from './questions/questions';
+import YourAnswers from './answers/answers';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -25,6 +26,7 @@ root.render(
             <Route index element={<Navigate to="questions"/>} />
             <Route path="profile" element={<Profile />} />
             <Route path="questions" element={<YourQuestions />} />
+            <Route path="answers" element={<YourAnswers />} />
           </Route>
           <Route
             path="*"

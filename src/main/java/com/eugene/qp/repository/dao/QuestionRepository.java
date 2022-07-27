@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface QuestionRepository extends PagingAndSortingRepository<Question, Long> {
 
     Page<Question> findByFromUser_IdOrderById(long userId, Pageable pageable);
+
+    Page<Question> findByToUser_IdOrderById(long userId, Pageable pageable);
 }

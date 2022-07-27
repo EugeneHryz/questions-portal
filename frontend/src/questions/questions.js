@@ -1,6 +1,5 @@
 import { Pagination, PaginationItem } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import questionService from "../service/questionService";
 import { AppContext } from "../app-context/appContext";
@@ -9,13 +8,18 @@ import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import { Link, useLocation } from 'react-router-dom';
 import { formatAnswerType } from "../util/util";
 import ConfirmDialog from "../home/confirmDialog";
+import AddEditQuestionDialog from '../questions/addEditQuestionDialog';
+import answerService from "../service/answerService";
+import SockJS from "sockjs-client";
+import { Stomp } from "@stomp/stompjs";
 
 const PAGE_SIZE = 4;
+
+let stompClient = null;
 
 function YourQuestions(props) {
       
     const context = useContext(AppContext);
-    const [addEditQuestionModalShown, startEditingQuestion, startAddingQuestion] = useOutletContext();
 
     const location = useLocation();
     const query = new URLSearchParams(location.search);
@@ -29,7 +33,18 @@ function YourQuestions(props) {
         showConfirmDialog: false
     });
     const [questions, setQuestions] = useState([]);
-    const [selectedQuestion, setSelectedQuestion] = useState(-1);
+    const [answers, setAnswers] = useState([]);
+    const [addEditQuestionModalShown, setAddEditQuestionModalShown] = useState(false);
+    
+    // true - edit question, false - add question
+    const [editQuestion, setEditQuestion] = useState(false);
+    const [selectedQuestion, setSelectedQuestion] = useState({
+        id: '',
+        toUserEmail: '',
+        question: '',
+        answerType: '',
+        answerOptions: []
+    });
 
     useEffect(() => {
         if (!addEditQuestionModalShown) {
@@ -42,6 +57,41 @@ function YourQuestions(props) {
 
     }, [state.currentPage, context]);
 
+    useEffect(() => {
+        stompClient = Stomp.over(function () {
+            return new SockJS('http://localhost:8080/questions-portal/ws');
+        });
+
+        let subscription;
+        stompClient.onConnect = function () {
+
+            subscription = stompClient
+                .subscribe('/user/queue/answer-updates', function (message) {
+                    const answerEvent = JSON.parse(message.body);
+                    const newAnswer = answerEvent.content;
+                    console.log(JSON.stringify(newAnswer));
+
+                    const updatedAnswers = answers.slice();
+                    const index = answers.findIndex(a => a.id === answerEvent.id);
+                    if (index === -1) {
+                        updatedAnswers.push(newAnswer);
+                    } else {
+                        updatedAnswers[index] = newAnswer;
+                    }
+
+                    setAnswers(updatedAnswers);
+                });
+        }
+
+        stompClient.activate();
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+                stompClient.deactivate();
+            }
+        };
+    }, [questions]);
+
     function handlePageChange(e, newValue) {
         setState(prevState => {
             return { ...prevState, currentPage: newValue };
@@ -49,25 +99,16 @@ function YourQuestions(props) {
     }
 
     function handleQuestionDelete(item) {
-        const questionId = item.id;
-        setSelectedQuestion(questionId);
-
+        setSelectedQuestion(item);
         // show confirmation dialog
         setState(prevState => {
             return { ...prevState, showConfirmDialog: !prevState.showConfirmDialog };
         });
     }
 
-    function handleEditQuestion(item) {
-        const questionId = item.id;
-        setSelectedQuestion(questionId);
-
-        startEditingQuestion(item);
-    }
-
     function onDialogResult(result) {
         if (result) {
-            questionService.deleteQuestion(selectedQuestion).then(response => {
+            questionService.deleteQuestion(selectedQuestion.id).then(response => {
                 if (state.numberOfElements === 1 && state.currentPage !== 1) {
                     setState(prevState => {
                         return { ...prevState, currentPage: prevState.currentPage - 1 };
@@ -89,18 +130,22 @@ function YourQuestions(props) {
     }
 
     function loadCurrentPage() {
-        questionService.getUserQuestionsPaginated(context.user.id, state.currentPage - 1, PAGE_SIZE)
+        questionService.getQuestionsFromUserPaginated(context.user.id, state.currentPage - 1, PAGE_SIZE)
             .then(response => {
-                console.log(response.data.content);
                 setState(prevState => {
                     return {
                         ...prevState, 
                         pageCount: response.data.totalPages,
-                        numberOfElements: response.data.numberOfElements,
-                        showNoQuestionsMsg: false
+                        numberOfElements: response.data.numberOfElements
                     };
                 });
                 setQuestions(response.data.content);
+
+                const questionIds = response.data.content.map(q => q.id);
+                return answerService.getAnswersByQuestionIds(questionIds);
+            })
+            .then(response => {
+                setAnswers(response.data);
             })
             .catch(error => {
                 console.log(error);
@@ -111,12 +156,16 @@ function YourQuestions(props) {
         <div className="card questions-page">
             <div className="card-header d-flex justify-content-between align-self-stretch">
                 Your questions
-                <button className="btn btn-secondary align-self-end" onClick={() => startAddingQuestion()}>
+                <button className="btn btn-secondary align-self-end" onClick={() => {
+                        setEditQuestion(false);
+                        setSelectedQuestion({});
+                        setAddEditQuestionModalShown(true);
+                    }}>
                     <i className="fa-solid fa-plus"></i> Create
                 </button>
             </div>
             <div className="py-0 w-100 table-wrapper">
-                <table className={'table table-hover my-0 questions-table ' + 
+                <table className={'table table-hover my-0 my-fixed-table questions-table ' + 
                     (state.numberOfElements === 0 ? 'opacity-0' : '')}>
                     <thead>
                         <tr>
@@ -135,10 +184,15 @@ function YourQuestions(props) {
                                 <td className="answer-type-col" title={formatAnswerType(q.answerType)}>
                                     {formatAnswerType(q.answerType)}
                                 </td>
-                                <td className="answer-col"></td>
+                                <td className="answer-col" title={answers.find(e => e.questionId === q.id)?.answer}>
+                                    {answers.find(e => e.questionId === q.id)?.answer}</td>
                                 <td className="actions-col">
                                     <IconButton title="edit" sx={{ mr: '-8px', fontSize: '22px' }}
-                                        edge="end" onClick={() => startEditingQuestion(q)}>
+                                        edge="end" onClick={() => {
+                                            setEditQuestion(true);
+                                            setSelectedQuestion(old => ({ ...old, ...q }));
+                                            setAddEditQuestionModalShown(true);
+                                        }}>
                                         <EditRoundedIcon />
                                     </IconButton>
                                     <IconButton title="delete" sx={{ mr: '-8px', fontSize: '22px' }}
@@ -152,7 +206,7 @@ function YourQuestions(props) {
                 </table>
                 {
                     state.numberOfElements === 0 &&
-                    <div className="empty-table-description text-center my-auto">You have no questions</div>
+                    <div className="empty-table-description text-center my-auto">You haven't created any questions yet</div>
                 }
             </div>
             
@@ -171,15 +225,20 @@ function YourQuestions(props) {
                             {...item} />
                     )} />
             </div>
-            <ConfirmDialog 
-                title="Really delete?" 
-                actionBtn="Delete" 
+            <ConfirmDialog
+                title="Really delete?"
+                actionBtn="Delete"
                 cancelBtn="No"
                 show={state.showConfirmDialog}
                 onResult={onDialogResult}
                 onDismiss={onDialogDismissed} />
-        </div>);
 
+            <AddEditQuestionDialog
+                show={addEditQuestionModalShown}
+                edit={editQuestion}
+                hide={() => setAddEditQuestionModalShown(false)}
+                question={selectedQuestion} />
+        </div>);
 }
 
 export default YourQuestions;

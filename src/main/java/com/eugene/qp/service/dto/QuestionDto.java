@@ -8,21 +8,22 @@ public class QuestionDto extends AbstractDto {
 
     private String question;
     private AnswerType answerType;
-    private long fromUserId;
-    private String toUserEmail;
     private Set<String> answerOptions;
+
+    private String toUserEmail;
+    private UserDto fromUser;
 
     public QuestionDto() {
     }
 
     public QuestionDto(String question,
                        AnswerType answerType,
-                       long fromUserId,
+                       UserDto fromUser,
                        String toUserEmail,
                        Set<String> answerOptions) {
         this.question = question;
         this.answerType = answerType;
-        this.fromUserId = fromUserId;
+        this.fromUser = fromUser;
         this.toUserEmail = toUserEmail;
         this.answerOptions = answerOptions;
     }
@@ -43,12 +44,12 @@ public class QuestionDto extends AbstractDto {
         this.answerType = answerType;
     }
 
-    public long getFromUserId() {
-        return fromUserId;
+    public UserDto getFromUser() {
+        return fromUser;
     }
 
-    public void setFromUserId(long fromUserId) {
-        this.fromUserId = fromUserId;
+    public void setFromUser(UserDto fromUser) {
+        this.fromUser = fromUser;
     }
 
     public String getToUserEmail() {
@@ -73,9 +74,9 @@ public class QuestionDto extends AbstractDto {
                 "id=" + id +
                 ", question='" + question + '\'' +
                 ", answerType=" + answerType +
-                ", fromUserId=" + fromUserId +
-                ", toUserEmail='" + toUserEmail + '\'' +
                 ", answerOptions=" + answerOptions +
+                ", toUserEmail='" + toUserEmail + '\'' +
+                ", fromUser=" + fromUser +
                 '}';
     }
 }

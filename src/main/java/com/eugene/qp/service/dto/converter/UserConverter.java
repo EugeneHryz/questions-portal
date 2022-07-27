@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.InvocationTargetException;
 
 @Component
-public class UserDtoConverter implements Converter<UserDto, User> {
+public class UserConverter implements Converter<User, UserDto> {
 
     @Override
-    public User convert(UserDto source) {
-        User user = new User();
+    public UserDto convert(User source) {
+        UserDto userDto = new UserDto();
         try {
-            BeanUtils.copyProperties(user, source);
+            BeanUtils.copyProperties(userDto, source);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Unable to convert from UserDto to User");
+            throw new RuntimeException("Unable to convert from User to UserDto");
         }
-        return user;
+        return userDto;
     }
 }

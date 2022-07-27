@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppContext } from '../app-context/appContext';
 import Header from '../header/header';
-import AddEditQuestionModal from '../questions/addEditQuestion';
+import AddEditQuestionDialog from '../questions/addEditQuestionDialog';
 import userService from '../service/userService';
 
 function HomePage(props) {
@@ -24,16 +24,6 @@ function HomePage(props) {
         password: '',
         passwordInvalidMsg: '',
         failedToDeleteMsg: ''
-    });
-    const [addEditQuestionModalShown, setAddEditQuestionModalShown] = useState(false);
-    // true - edit question, false - add question
-    const [editQuestion, setEditQuestion] = useState(false);
-    const [selectedQuestion, setSelectedQuestion] = useState({
-        id: '',
-        toUserEmail: '',
-        question: '',
-        answerType: '',
-        answerOptions: []
     });
     const navigate = useNavigate();
 
@@ -82,21 +72,21 @@ function HomePage(props) {
         })
     }
 
-    function startEditingQuestion(q) {
-        setEditQuestion(true);
-        setSelectedQuestion(old => ({ ...old, ...q }));
-        setAddEditQuestionModalShown(true);
-    }
+    // function startEditingQuestion(q) {
+    //     setEditQuestion(true);
+    //     setSelectedQuestion(old => ({ ...old, ...q }));
+    //     setAddEditQuestionModalShown(true);
+    // }
 
-    function startAddingQuestion() {
-        setEditQuestion(false);
-        setSelectedQuestion({});
-        setAddEditQuestionModalShown(true);
-    }
+    // function startAddingQuestion() {
+    //     setEditQuestion(false);
+    //     setSelectedQuestion({});
+    //     setAddEditQuestionModalShown(true);
+    // }
 
     return (<div className="home-page">
         <Header showModal={state.showModal} />
-        <Outlet context={[addEditQuestionModalShown, startEditingQuestion, startAddingQuestion]} />
+        <Outlet />
 
         <AppContext.Consumer>
             {({ user, setUser }) => (
@@ -132,12 +122,6 @@ function HomePage(props) {
                     </div>
                 </div>)}
         </AppContext.Consumer>
-
-        <AddEditQuestionModal 
-            show={addEditQuestionModalShown}
-            edit={editQuestion} 
-            hide={() => setAddEditQuestionModalShown(false)} 
-            question={selectedQuestion} />
     </div>);
 }
 

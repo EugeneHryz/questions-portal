@@ -1,9 +1,20 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import userService from "../service/userService";
 
 function Header(props) {
 
+    const location = useLocation();
     const navigate = useNavigate();
+    const [activeNavItem, setActiveNavItem] = useState('questions');
+
+    useEffect(() => {
+        if (location.pathname.includes('/answers')) {
+            setActiveNavItem('answers');
+        } else {
+            setActiveNavItem('questions');
+        }
+    }, [location]);
 
     function logOut() {
         userService.logOut().then((response) => {
@@ -31,10 +42,12 @@ function Header(props) {
 
                 <ul className="navbar-nav me-auto mb-lg-0">
                     <li className="nav-item">
-                        <Link className="nav-link active" to="/home/questions">Your questions</Link>
+                        <Link className={'nav-link ' + (activeNavItem === 'questions' ? 'active' : '')}
+                            to="/home/questions">Your questions</Link>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" href="#">Your answers</a>
+                        <Link className={'nav-link ' + (activeNavItem === 'answers' ? 'active' : '')}
+                            to="/home/answers">Your answers</Link>
                     </li>
                 </ul>
 

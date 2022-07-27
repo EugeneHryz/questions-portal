@@ -68,7 +68,6 @@ public class UserServiceImpl implements UserService {
                 user.getFirstName(),
                 user.getLastName());
         User savedUser = userRepository.save(newUser);
-        user.setPassword(null);
         user.setId(savedUser.getId());
 
         mailService.sendSimpleMail(emailFrom, user.getEmail(),
@@ -85,9 +84,6 @@ public class UserServiceImpl implements UserService {
         }
         User user = userOptional.get();
         UserDto userDto = conversionService.convert(user, UserDto.class);
-        if (userDto != null) {
-            userDto.setPassword(null);
-        }
         return userDto;
     }
 
@@ -96,13 +92,7 @@ public class UserServiceImpl implements UserService {
         Pageable pageRequest = PageRequest.of(page, size);
         Page<User> usersPage = userRepository.findUsersByEmailContaining(searchEmail, pageRequest);
 
-        return usersPage.map(u -> {
-            UserDto userDto = conversionService.convert(u, UserDto.class);
-            if (userDto != null) {
-                userDto.setPassword(null);
-            }
-            return userDto;
-        });
+        return usersPage.map(u -> conversionService.convert(u, UserDto.class));
     }
 
     @Override

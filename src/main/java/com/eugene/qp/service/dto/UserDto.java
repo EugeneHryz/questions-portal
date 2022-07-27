@@ -1,11 +1,14 @@
 package com.eugene.qp.service.dto;
 
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserDto extends AbstractDto {
 
     private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
     private String firstName;
     private String lastName;
     private String phoneNumber;

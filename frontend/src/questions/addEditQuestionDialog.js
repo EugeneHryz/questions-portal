@@ -1,6 +1,6 @@
 import { Modal } from "bootstrap";
 import { useEffect, useRef, useState } from "react";
-import { Autocomplete, TextField, IconButton, ListItem } from "@mui/material";
+import { Autocomplete, TextField, IconButton, ListItem, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { ListItemText, List, Button, CircularProgress } from "@mui/material";
 import { TransitionGroup } from 'react-transition-group';
 import Collapse from '@mui/material/Collapse';
@@ -27,7 +27,7 @@ function renderItem(item, handleRemoveItem) {
     );
 }
 
-function AddEditQuestionModal(props) {
+function AddEditQuestionDialog(props) {
 
     const modalRef = useRef();
     const [state, setState] = useState({
@@ -36,20 +36,23 @@ function AddEditQuestionModal(props) {
         answerTypes: [],
 
         addedOptions: [],
-        answerOption: '',
         toUserInvalidMsg: '',
         questionInvalidMsg: '',
         optionsInvalidMsg: ''
     });
+    const [answerOption, setAnswerOption] = useState('');
+
     const [userSelectOpen, setUserSelectOpen] = useState(false);
     const [usersLoading, setUsersLoading] = useState(false);
     const [selectedAnswerType, setSelectedAnswerType] = useState('');
     const [dontNeedOptions, setDontNeedOptions] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(props.edit ? props.question.toUserEmail : '');
-    const [question, setQuestion] = useState(props.edit ? props.question.question : '');
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [question, setQuestion] = useState('');
 
     // question id to edit
     const [questionId, setQuestionId] = useState(-1);
+
+    const [test, setTest] = useState('');
 
     useEffect(() => {
         if (props.show) {
@@ -99,14 +102,6 @@ function AddEditQuestionModal(props) {
             console.log(error);
         })
     }, [props.question]);
-
-    function handleChange(e) {
-        const name = e.target.name;
-        const value = e.target.value;
-        setState(prevState => {
-            return { ...prevState, [name]: value };
-        });
-    }
 
     function removeItemFromOptionsList(item) {
         setState(prevState => {
@@ -225,7 +220,8 @@ function AddEditQuestionModal(props) {
             });
     }
 
-    return (<div className="modal fade" id="addEditQuestionModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+    return (
+    <div className="modal fade" id="addEditQuestionModal" data-bs-backdrop="static" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
             ref={modalRef}>
         <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -310,6 +306,7 @@ function AddEditQuestionModal(props) {
                                     </div>
                                 </div>
 
+                            
                                 <div className="row mb-3">
                                     <label htmlFor="answerOptionText" className="col-sm-4 my-auto">Add option</label>
                                     <div className="col-sm-8">
@@ -317,16 +314,16 @@ function AddEditQuestionModal(props) {
                                             fullWidth
                                             id="answerOptionText"
                                             label="Answer option" variant="standard"
-                                            value={state.answerOption}
+                                            value={answerOption}
                                             name="answerOption"
-                                            onChange={handleChange}
+                                            onChange={(e) => setAnswerOption(e.target.value)}
                                             disabled={dontNeedOptions}
                                             error={state.optionsInvalidMsg.length !== 0}
                                             helperText={state.optionsInvalidMsg}
                                             InputProps={{
                                                 endAdornment: <Button onClick={() => {
-                                                    if (state.answerOption) {
-                                                        addOptionItem(state.answerOption);
+                                                    if (answerOption) {
+                                                        addOptionItem(answerOption);
                                                     }
                                                 }}
                                                     disabled={dontNeedOptions}>Add</Button>
@@ -355,6 +352,8 @@ function AddEditQuestionModal(props) {
                                 }
                             </form>)}
                     </AppContext.Consumer>
+
+                    
                         
                     <div className="d-flex justify-content-end mt-3">
                         <button className="btn btn-grey me-2" data-bs-dismiss="modal">Cancel</button>
@@ -366,4 +365,4 @@ function AddEditQuestionModal(props) {
     </div>);
 }
 
-export default AddEditQuestionModal;
+export default AddEditQuestionDialog;

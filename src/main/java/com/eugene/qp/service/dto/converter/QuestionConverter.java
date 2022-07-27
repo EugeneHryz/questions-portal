@@ -10,25 +10,25 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class QuestionDtoConverter implements Converter<QuestionDto, Question> {
+public class QuestionConverter implements Converter<Question, QuestionDto> {
 
-    private final UserDtoConverter userDtoConverter;
+    private final UserConverter userConverter;
 
     @Autowired
-    public QuestionDtoConverter(UserDtoConverter userDtoConverter) {
-        this.userDtoConverter = userDtoConverter;
+    public QuestionConverter(UserConverter userConverter) {
+        this.userConverter = userConverter;
     }
 
     @Override
-    public Question convert(QuestionDto source) {
-        Question question = new Question(source.getQuestion(),
+    public QuestionDto convert(Question source) {
+        QuestionDto questionDto = new QuestionDto(source.getQuestion(),
                 source.getAnswerType(),
-                userDtoConverter.convert(source.getFromUser()),
-                null,
+                userConverter.convert(source.getFromUser()),
+                source.getToUser().getEmail(),
                 source.getAnswerOptions().stream()
-                        .map(AnswerOption::new)
+                        .map(AnswerOption::getOption)
                         .collect(Collectors.toSet()));
-        question.setId(source.getId());
-        return question;
+        questionDto.setId(source.getId());
+        return questionDto;
     }
 }
