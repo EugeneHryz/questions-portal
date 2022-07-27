@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class AnswerController {
     }
 
     @PostMapping(consumes = {"application/json"})
-    public ResponseEntity<AnswerDto> createQuestion(@RequestBody AnswerDto answerDto,
+    public ResponseEntity<AnswerDto> createQuestion(@RequestBody @Valid AnswerDto answerDto,
                                                     UriComponentsBuilder ucb) throws QuestionNotFoundException {
         AnswerDto createdAnswer = answerService.createAnswer(answerDto);
         URI locationUri = ucb.path("/answers/")
@@ -37,7 +38,7 @@ public class AnswerController {
 
     @PutMapping(value = "/{id}", consumes = {"application/json"})
     public AnswerDto updateAnswer(@PathVariable long id,
-                                  @RequestBody AnswerDto answerDto) throws AnswerNotFoundException {
+                                  @RequestBody @Valid AnswerDto answerDto) throws AnswerNotFoundException {
         answerDto.setId(id);
         return answerService.updateAnswer(answerDto);
     }

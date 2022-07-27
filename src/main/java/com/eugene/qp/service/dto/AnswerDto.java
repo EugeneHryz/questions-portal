@@ -1,8 +1,12 @@
 package com.eugene.qp.service.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class AnswerDto extends AbstractDto {
 
+    @NotBlank
     private String answer;
+
     private long questionId;
 
     public AnswerDto() {
