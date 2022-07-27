@@ -7,6 +7,7 @@ import com.eugene.qp.service.exception.InvalidPasswordException;
 import com.eugene.qp.service.exception.UserAlreadyExistsException;
 import com.eugene.qp.service.exception.UserNotFoundException;
 import com.eugene.qp.web.exception.InvalidRequestException;
+import com.eugene.qp.web.exception.UnauthorizedAccessException;
 import com.eugene.qp.web.model.UserPasswordModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -67,8 +68,11 @@ public class UserController {
     }
 
     @PutMapping(value = "/{id}")
-    public UserDto updateUser(@PathVariable long id, @RequestBody @Valid UserDto user, BindingResult result)
-            throws UserNotFoundException, InvalidPasswordException, InvalidRequestException {
+    public UserDto updateUser(@PathVariable long id, @RequestBody @Valid UserDto user,
+                              BindingResult result)
+            throws UserNotFoundException, InvalidPasswordException,
+            InvalidRequestException {
+
         if (result.hasErrors()) {
             throw new InvalidRequestException(result.getAllErrors().toString());
         }
@@ -78,7 +82,9 @@ public class UserController {
 
     @DeleteMapping(value = "/{id}")
     public void deleteUser(@PathVariable long id, @RequestBody UserPasswordModel password,
-                           HttpServletRequest request) throws UserNotFoundException, InvalidPasswordException {
+                           HttpServletRequest request)
+            throws UserNotFoundException, InvalidPasswordException {
+
         userService.deleteUser(id, password.getPassword(), request);
     }
 }

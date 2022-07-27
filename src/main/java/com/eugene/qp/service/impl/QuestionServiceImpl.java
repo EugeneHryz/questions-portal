@@ -130,6 +130,18 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    public Optional<QuestionDto> findQuestionFromUserById(String fromUser, long questionId) {
+        return questionRepository.findByFromUser_EmailAndId(fromUser, questionId)
+                .map(q -> conversionService.convert(q, QuestionDto.class));
+    }
+
+    @Override
+    public Optional<QuestionDto> findQuestionToUserById(String toUser, long questionId) {
+        return questionRepository.findByToUser_EmailAndId(toUser, questionId)
+                .map(q -> conversionService.convert(q, QuestionDto.class));
+    }
+
+    @Override
     public void deleteQuestion(long id) throws QuestionNotFoundException {
         Optional<Question> question = questionRepository.findById(id);
         if (question.isEmpty()) {

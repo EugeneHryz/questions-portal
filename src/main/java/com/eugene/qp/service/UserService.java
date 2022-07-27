@@ -14,6 +14,8 @@ public interface UserService {
 
     UserDto getUserByEmail(String email) throws UserNotFoundException;
 
+
+
     Page<UserDto> searchUsersByEmailPaginated(String searchEmail, int page, int size);
 
     UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException;

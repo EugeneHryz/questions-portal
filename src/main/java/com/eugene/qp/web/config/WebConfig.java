@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.util.Properties;
@@ -17,6 +18,7 @@ import java.util.Properties;
 @Configuration
 @ComponentScan(value = {"com.eugene.qp.web", "com.eugene.qp.service.impl",
         "com.eugene.qp.service.dto.converter"})
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebConfig extends WebMvcConfigurationSupport {
 
     @Autowired

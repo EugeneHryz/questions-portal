@@ -114,13 +114,6 @@ function YourAnswers(props) {
         return array;
     }
 
-    // function handleEditQuestion(item) {
-    //     const questionId = item.id;
-    //     setSelectedQuestion(questionId);
-
-    //     startEditingQuestion(item);
-    // }
-
     function loadCurrentPage() {
         questionService.getQuestionsToUserPaginated(context.user.id, state.currentPage - 1, PAGE_SIZE)
             .then(response => {
@@ -165,7 +158,8 @@ function YourAnswers(props) {
                             <tr key={q.id}>
                                 <td className="from-user-col">{q.fromUser.email}</td>
                                 <td className="question-col">{q.question}</td>
-                                <td className="answer-col">{answers.find(e => e.questionId === q.id)?.answer}</td>
+                                <td className="answer-col" title={answers.find(e => e.questionId === q.id)?.answer}>
+                                    {answers.find(e => e.questionId === q.id)?.answer}</td>
                                 <td className="actions-col">
                                     <IconButton title="edit" sx={{ mr: '-8px', fontSize: '22px' }}
                                         edge="end" onClick={() => {

@@ -3,8 +3,7 @@ import axios from 'axios';
 const QUESTIONS_URL = "http://localhost:8080/questions-portal/questions";
 const options = {
     headers: {
-        'content-type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        'content-type': 'application/json'
     },
     withCredentials: true
 }
@@ -33,9 +32,6 @@ class QuestionService {
             withCredentials: true,
             params: {
                 userId, page, size
-            },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
             }
         }
         return axios.get(QUESTIONS_URL + "/from-user", options);
@@ -60,9 +56,6 @@ class QuestionService {
             withCredentials: true,
             params: {
                 userId, page, size
-            },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
             }
         }
         return axios.get(QUESTIONS_URL + "/to-user", options);

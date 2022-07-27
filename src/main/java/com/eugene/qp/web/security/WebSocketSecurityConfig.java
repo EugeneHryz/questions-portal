@@ -16,7 +16,6 @@ public class WebSocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
 
 	@Override
 	protected boolean sameOriginDisabled() {
-		// While CSRF is disabled..
 		return true;
 	}
 }

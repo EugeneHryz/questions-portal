@@ -9,6 +9,8 @@ import com.eugene.qp.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -38,6 +40,7 @@ public class QuestionController {
         return questionService.getAllAnswerTypes();
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToAccess(authentication, #userId)")
     @GetMapping(value = "/from-user", produces = {"application/json"})
     public Page<QuestionDto> getQuestionsFromUser(@RequestParam(value = "userId") long userId,
                                                   @RequestParam(value = "page", defaultValue = "0") int page,
@@ -45,6 +48,7 @@ public class QuestionController {
         return questionService.getQuestionsFromUserPaginated(userId, page, size);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToAccess(authentication, #userId)")
     @GetMapping(value = "/to-user", produces = {"application/json"})
     public Page<QuestionDto> getQuestionsToUser(@RequestParam(value = "userId") long userId,
                                                 @RequestParam(value = "page", defaultValue = "0") int page,
@@ -52,6 +56,7 @@ public class QuestionController {
         return questionService.getQuestionsToUserPaginated(userId, page, size);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToAccess(authentication, #questionDto.fromUser.id)")
     @PostMapping(consumes = {"application/json"})
     public ResponseEntity<QuestionDto> createQuestion(@RequestBody @Valid QuestionDto questionDto,
                                                       UriComponentsBuilder ucb) throws UserNotFoundException {
@@ -63,19 +68,19 @@ public class QuestionController {
         return ResponseEntity.created(locationUri).body(createdQuestion);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToModifyQuestion(authentication, #id)")
     @PutMapping(value = "/{id}", consumes = {"application/json"})
     public QuestionDto updateQuestion(@PathVariable long id,
-                                                      @RequestBody @Valid QuestionDto questionDto)
+                                      @RequestBody @Valid QuestionDto questionDto)
             throws UserNotFoundException, QuestionNotFoundException {
         questionDto.setId(id);
-        QuestionDto updatedQuestion = questionService.updateQuestion(questionDto);
 
-        return updatedQuestion;
+        return questionService.updateQuestion(questionDto);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToModifyQuestion(authentication, #id)")
     @DeleteMapping(value = "/{id}")
     public void deleteQuestion(@PathVariable long id) throws QuestionNotFoundException {
         questionService.deleteQuestion(id);
     }
-
 }

@@ -2,8 +2,10 @@ package com.eugene.qp.web.security;
 
 import com.eugene.qp.repository.dao.UserRepository;
 import com.eugene.qp.service.impl.UserDetailsServiceImpl;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
@@ -35,8 +38,13 @@ public class AppSecurityConfig {
                 .and()
                 .csrf().disable()
                 .httpBasic()
+                .authenticationEntryPoint(new NoPopupAuthenticationEntryPoint())
                 .and()
                 .authorizeRequests()
+                .antMatchers(HttpMethod.DELETE,"/users/{id}")
+                .access("@userSecurity.isAllowedToAccess(authentication,#id)")
+                .antMatchers(HttpMethod.PUT, "/users/{id}")
+                .access("@userSecurity.isAllowedToAccess(authentication,#id)")
                 .antMatchers("/users/signup").permitAll()
                 .anyRequest().authenticated()
                 .and()

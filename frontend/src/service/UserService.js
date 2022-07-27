@@ -3,8 +3,7 @@ import axios from 'axios';
 const USERS_URL = "http://localhost:8080/questions-portal/users";
 const options = {
     headers: {
-        'content-type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        'content-type': 'application/json'
     },
     withCredentials: true
 }
@@ -13,10 +12,7 @@ class UserService {
     
     logIn(email, password) {
         const options = {
-            withCredentials: true,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
+            withCredentials: true
         };
         if (email && password) {
             options.auth = {
@@ -44,8 +40,7 @@ class UserService {
     deleteUserAccount(userId, password) {
         const options = {
             headers: {
-                'content-type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'content-type': 'application/json'
             },
             withCredentials: true,
             data: { password }

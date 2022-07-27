@@ -4,6 +4,7 @@ import com.eugene.qp.service.dto.AnswerDto;
 import com.eugene.qp.service.exception.AnswerNotFoundException;
 import com.eugene.qp.service.exception.QuestionNotFoundException;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface AnswerService {
@@ -13,4 +14,6 @@ public interface AnswerService {
     AnswerDto updateAnswer(AnswerDto answerDto) throws AnswerNotFoundException;
 
     Set<AnswerDto> getAnswersByQuestionIds(Long[] ids);
+
+    Optional<AnswerDto> findUserAnswerById(String userEmail, long answerId);
 }

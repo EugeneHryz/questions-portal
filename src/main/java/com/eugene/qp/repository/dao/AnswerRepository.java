@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface AnswerRepository extends PagingAndSortingRepository<Answer, Long> {
@@ -13,4 +14,6 @@ public interface AnswerRepository extends PagingAndSortingRepository<Answer, Lon
     Set<Answer> findAnswersByQuestionIds(@Param("questionIds") Set<Long> questionIds);
 
     void deleteAnswerByQuestion_Id(long questionId);
+
+    Optional<Answer> findByQuestion_ToUser_EmailAndId(String toUser, long answerId);
 }

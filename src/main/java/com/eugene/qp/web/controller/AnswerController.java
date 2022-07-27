@@ -6,7 +6,7 @@ import com.eugene.qp.service.exception.AnswerNotFoundException;
 import com.eugene.qp.service.exception.QuestionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -25,9 +25,10 @@ public class AnswerController {
         this.answerService = answerService;
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToAnswer(authentication, #answerDto.questionId)")
     @PostMapping(consumes = {"application/json"})
-    public ResponseEntity<AnswerDto> createQuestion(@RequestBody @Valid AnswerDto answerDto,
-                                                    UriComponentsBuilder ucb) throws QuestionNotFoundException {
+    public ResponseEntity<AnswerDto> createAnswer(@RequestBody @Valid AnswerDto answerDto,
+                                                  UriComponentsBuilder ucb) throws QuestionNotFoundException {
         AnswerDto createdAnswer = answerService.createAnswer(answerDto);
         URI locationUri = ucb.path("/answers/")
                 .path(String.valueOf(createdAnswer.getId()))
@@ -36,6 +37,7 @@ public class AnswerController {
         return ResponseEntity.created(locationUri).body(createdAnswer);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToModifyAnswer(authentication, #id)")
     @PutMapping(value = "/{id}", consumes = {"application/json"})
     public AnswerDto updateAnswer(@PathVariable long id,
                                   @RequestBody @Valid AnswerDto answerDto) throws AnswerNotFoundException {
@@ -43,6 +45,7 @@ public class AnswerController {
         return answerService.updateAnswer(answerDto);
     }
 
+    @PreAuthorize("@userSecurity.isAllowedToAccessAnswers(authentication, #questionIds)")
     @GetMapping(produces = {"application/json"})
     public Set<AnswerDto> getAnswersByQuestionIds(@RequestParam(value = "questionIds")
                                                               Long[] questionIds) {

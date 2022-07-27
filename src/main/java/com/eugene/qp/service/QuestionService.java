@@ -7,6 +7,7 @@ import com.eugene.qp.service.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface QuestionService {
 
@@ -21,4 +22,8 @@ public interface QuestionService {
     Page<QuestionDto> getQuestionsToUserPaginated(long toUserId, int page, int size);
 
     void deleteQuestion(long id) throws QuestionNotFoundException;
+
+    Optional<QuestionDto> findQuestionFromUserById(String fromUser, long questionId);
+
+    Optional<QuestionDto> findQuestionToUserById(String toUser, long questionId);
 }

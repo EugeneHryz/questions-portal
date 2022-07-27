@@ -96,4 +96,10 @@ public class AnswerServiceImpl implements AnswerService {
         return answers.stream().map(a -> conversionService.convert(a, AnswerDto.class))
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public Optional<AnswerDto> findUserAnswerById(String userEmail, long answerId) {
+        return answerRepository.findByQuestion_ToUser_EmailAndId(userEmail, answerId)
+                .map(a -> conversionService.convert(a, AnswerDto.class));
+    }
 }

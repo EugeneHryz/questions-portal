@@ -3,8 +3,7 @@ import axios from 'axios';
 const ANSWERS_URL = "http://localhost:8080/questions-portal/answers";
 const options = {
     headers: {
-        'content-type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest'
+        'content-type': 'application/json'
     },
     withCredentials: true
 }
@@ -30,9 +29,6 @@ class AnswerService {
             withCredentials: true,
             params: {
                 questionIds: questionIds.join()
-            },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
             }
         }
         return axios.get(ANSWERS_URL, options);
