@@ -71,7 +71,7 @@ public class UserController {
     public UserDto updateUser(@PathVariable long id, @RequestBody @Valid UserDto user,
                               BindingResult result)
             throws UserNotFoundException, InvalidPasswordException,
-            InvalidRequestException {
+            InvalidRequestException, UserAlreadyExistsException {
 
         if (result.hasErrors()) {
             throw new InvalidRequestException(result.getAllErrors().toString());

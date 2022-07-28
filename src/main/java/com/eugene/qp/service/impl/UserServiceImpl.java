@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException {
+    public UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException, UserAlreadyExistsException {
         Optional<User> userOptional = userRepository.findById(user.getId());
         if (userOptional.isEmpty()) {
             throw new UserNotFoundException("Unable to find user with id = " + user.getId());
@@ -113,6 +113,10 @@ public class UserServiceImpl implements UserService {
         oldUser.setPhoneNumber(user.getPhoneNumber());
 
         if (!oldUser.getEmail().equals(user.getEmail())) {
+            Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+            if (existingUser.isPresent()) {
+                throw new UserAlreadyExistsException("User with this email already exists");
+            }
             oldUser.setEmail(user.getEmail());
             mailService.sendSimpleMail(emailFrom, user.getEmail(),
                     env.getProperty("mail.emailUpdated.subject"),

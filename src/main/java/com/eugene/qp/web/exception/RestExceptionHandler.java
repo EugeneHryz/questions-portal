@@ -1,9 +1,6 @@
 package com.eugene.qp.web.exception;
 
-import com.eugene.qp.service.exception.InvalidPasswordException;
-import com.eugene.qp.service.exception.QuestionNotFoundException;
-import com.eugene.qp.service.exception.UserAlreadyExistsException;
-import com.eugene.qp.service.exception.UserNotFoundException;
+import com.eugene.qp.service.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,7 +13,9 @@ public class RestExceptionHandler {
             UserNotFoundException.class,
             InvalidPasswordException.class,
             InvalidRequestException.class,
-            QuestionNotFoundException.class})
+            QuestionNotFoundException.class,
+            AnswerNotFoundException.class
+    })
     public ResponseEntity<?> controllerException(Exception e) {
 
         HttpStatus status;

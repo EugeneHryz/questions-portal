@@ -18,7 +18,8 @@ public interface UserService {
 
     Page<UserDto> searchUsersByEmailPaginated(String searchEmail, int page, int size);
 
-    UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException;
+    UserDto updateUser(UserDto user) throws UserNotFoundException, InvalidPasswordException,
+            UserAlreadyExistsException;
 
     /**
      * This method deletes the user with given id if the password is correct.
